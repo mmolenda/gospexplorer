@@ -2,6 +2,8 @@
 var w = 1200;
 var h = 500;
 
+var DIV_CHAPTER = 1;
+var DIV_PARAGRAPH = 2;
 var barPaddingHorizontal = 20;
 var barPaddingVertical = 60;
 var barWidth = 100;
@@ -20,44 +22,44 @@ var frequencyColors = {
 }
 
 var dataset = {
-	"chapters": [
+	"books": [
 		[
-			{"id": "1.1", "title": "Rodowód", "group": 1},
-			{"id": "1.2", "title": "Narodzenie", "group": 2},
-			{"id": "1.3", "title": "Jan", "group": 3},
-			{"id": "1.4", "title": "Post", "group": 4}
+			{"id": "1.1", "div": DIV_PARAGRAPH, "title": "Rodowód", "group": 1},
+			{"id": "1.2", "div": DIV_PARAGRAPH, "title": "Narodzenie", "group": 2},
+			{"id": "1.3", "div": DIV_PARAGRAPH, "title": "Jan", "group": 3},
+			{"id": "1.4", "div": DIV_PARAGRAPH, "title": "Post", "group": 4}
 		],
 		[
-			{"id": "2.1", "title": "Narodzenie", "group": 2},
-			{"id": "2.5", "title": "Modlitwa", "group": 6},
-			{"id": "2.2", "title": "Jan", "group": 3},
-			{"id": "2.4", "title": "Jałmużna", "group": 5},
-			{"id": "2.3", "title": "Post", "group": 4}
+			{"id": "2.1", "div": DIV_PARAGRAPH, "title": "Narodzenie", "group": 2},
+			{"id": "2.5", "div": DIV_PARAGRAPH, "title": "Modlitwa", "group": 6},
+			{"id": "2.2", "div": DIV_PARAGRAPH, "title": "Jan", "group": 3},
+			{"id": "2.4", "div": DIV_PARAGRAPH, "title": "Jałmużna", "group": 5},
+			{"id": "2.3", "div": DIV_PARAGRAPH, "title": "Post", "group": 4}
 		],
 		[
-			{"id": "3.1", "title": "Nawiedzenie", "group": 7},
-			{"id": "3.2", "title": "Narodzenie", "group": 2},
-			{"id": "3.3", "title": "Jan", "group": 3},
-			{"id": "3.4", "title": "Post", "group": 4}
+			{"id": "3.1", "div": DIV_PARAGRAPH, "title": "Nawiedzenie", "group": 7},
+			{"id": "3.2", "div": DIV_PARAGRAPH, "title": "Narodzenie", "group": 2},
+			{"id": "3.3", "div": DIV_PARAGRAPH, "title": "Jan", "group": 3},
+			{"id": "3.4", "div": DIV_PARAGRAPH, "title": "Post", "group": 4}
 		],
 		[
-			{"id": "4.1", "title": "Nawiedzenie", "group": 7},
-			{"id": "4.2", "title": "Narodzenie", "group": 2},
-			{"id": "4.4", "title": "Post", "group": 4}
+			{"id": "4.1", "div": DIV_PARAGRAPH, "title": "Nawiedzenie", "group": 7},
+			{"id": "4.2", "div": DIV_PARAGRAPH, "title": "Narodzenie", "group": 2},
+			{"id": "4.4", "div": DIV_PARAGRAPH, "title": "Post", "group": 4}
 		]
 	]
 }
 
-var groupCount = {
-	1: 1,
-	2: 4,
-	3: 3,
-	4: 4,
-	5: 1,
-	6: 1,
-	7: 2
-}
+// count groups
+var groupCount = {};
+dataset.books.forEach(function(gospel, i) {
+	gospel.forEach(function(d, i) {
+		if (groupCount[d.group] === undefined) {groupCount[d.group] = 0}
+		groupCount[d.group]++;
+	});
+});
 
+console.log(dataset.books[0]);
 
 //Create SVG element
 var svg = d3.select("body")
@@ -67,9 +69,9 @@ var svg = d3.select("body")
 
 
 // Drawing the boxes
-for (index = 0; index < dataset.chapters.length; ++index) {
+for (index = 0; index < dataset.books.length; ++index) {
 	svg.selectAll("rect.i" + index)
-	   .data(dataset.chapters[index])
+	   .data(dataset.books[index])
 	   .enter()
 	   .append("rect")
 	   .attr("x", function(d, i) {
@@ -89,7 +91,6 @@ for (index = 0; index < dataset.chapters.length; ++index) {
 	    	d3.selectAll("." + this.getAttribute("class")).style("stroke", colorDarkBrown);
 	     })
 	    .on("mouseclick", function(){
-	    	// d3.selectAll().style("stroke", colorMediumBrown);
 	    	d3.selectAll("." + this.getAttribute("class")).style("stroke", colorDarkBrown);
 	     })
 	    .on("mouseout", function(){
@@ -98,9 +99,9 @@ for (index = 0; index < dataset.chapters.length; ++index) {
 }
 
 // Adding text to the boxes
-for (index = 0; index < dataset.chapters.length; ++index) {
+for (index = 0; index < dataset.books.length; ++index) {
 	svg.selectAll("text.i" + index)
-		.data(dataset.chapters[index])
+		.data(dataset.books[index])
 	   	.enter()
 	   	.append("text")
 	   	.text(function(d) {
@@ -119,9 +120,9 @@ for (index = 0; index < dataset.chapters.length; ++index) {
 }
 
 // Drawing the lines
-for (index = 0; index < dataset.chapters.length - 1; ++index) {
+for (index = 0; index < dataset.books.length - 1; ++index) {
 	var lines = svg.attr("class", "line")
-		.selectAll("line.i" + index).data(dataset.chapters[index])
+		.selectAll("line.i" + index).data(dataset.books[index])
 	  	.enter()
 	  	.append("line")
 	  	.attr("x2", (index + 1) * (barWidth + barPaddingVertical))
@@ -153,10 +154,9 @@ for (index = 0; index < dataset.chapters.length - 1; ++index) {
 }
 
 
-
 function getNextIndex(group, index) {
 	var ret = -1;
-	dataset.chapters[index+1].forEach(function(d, i) {
+	dataset.books[index+1].forEach(function(d, i) {
 		if (d.group == group) {
 			ret = i;
 		}
