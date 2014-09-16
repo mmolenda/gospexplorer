@@ -32,7 +32,7 @@ var dataset = {
 		[
 			{"id": "2.1", "div": DIV_PARAGRAPH, "title": "Narodzenie", "group": 2},
 			{"id": "2.5", "div": DIV_PARAGRAPH, "title": "Modlitwa", "group": 6},
-			{"id": "2.2", "div": DIV_PARAGRAPH, "title": "Jan", "group": 3},
+			{"id": "2.2", "div": DIV_PARAGRAPH, "title": "Jan2", "group": 8},
 			{"id": "2.4", "div": DIV_PARAGRAPH, "title": "Jałmużna", "group": 5},
 			{"id": "2.3", "div": DIV_PARAGRAPH, "title": "Post", "group": 4}
 		],
@@ -51,15 +51,22 @@ var dataset = {
 }
 
 // count groups
+var groupDistance = {};
 var groupCount = {};
-dataset.books.forEach(function(gospel, i) {
-	gospel.forEach(function(d, i) {
-		if (groupCount[d.group] === undefined) {groupCount[d.group] = 0}
-		groupCount[d.group]++;
-	});
-});
 
-console.log(dataset.books[0]);
+for (var i = 0; i < dataset.books.length; i++) {
+	var book = dataset.books[i];
+	for (var j = 0; j < book.length; j++) {
+		var div = book[j];
+		if (groupCount[div.group] === undefined) {groupCount[div.group] = 0}
+		if (groupDistance[div.group] === undefined) {groupDistance[div.group] = [null, null, null, null]}
+		groupCount[div.group]++;
+		groupDistance[div.group][i] = j;
+	};
+};
+
+console.log(groupDistance);
+console.log(groupCount);
 
 //Create SVG element
 var svg = d3.select("body")
@@ -69,7 +76,7 @@ var svg = d3.select("body")
 
 
 // Drawing the boxes
-for (index = 0; index < dataset.books.length; ++index) {
+for (var index = 0; index < dataset.books.length; index++) {
 	svg.selectAll("rect.i" + index)
 	   .data(dataset.books[index])
 	   .enter()
@@ -99,7 +106,7 @@ for (index = 0; index < dataset.books.length; ++index) {
 }
 
 // Adding text to the boxes
-for (index = 0; index < dataset.books.length; ++index) {
+for (var index = 0; index < dataset.books.length; index++) {
 	svg.selectAll("text.i" + index)
 		.data(dataset.books[index])
 	   	.enter()
@@ -119,47 +126,54 @@ for (index = 0; index < dataset.books.length; ++index) {
 	   	.attr("fill", colorMediumBrown);
 }
 
+var lineFunction = d3.svg.line()
+		.x(function(d) { return d.x; })
+		.y(function(d) { return d.y; })
+		.interpolate("linear");
+
 // Drawing the lines
-for (index = 0; index < dataset.books.length - 1; ++index) {
-	var lines = svg.attr("class", "line")
-		.selectAll("line.i" + index).data(dataset.books[index])
+for (var index = 0; index < dataset.books.length - 1; index++) {
+	svg.selectAll("path.i" + index)
+		.data(dataset.books[index])
 	  	.enter()
-	  	.append("line")
-	  	.attr("x2", (index + 1) * (barWidth + barPaddingVertical))
-	  	.attr("x1", function(d,i) {
-	  		// if no item of the same group in next column, set x1 same as x2 to hide the line
-	  		if(getNextIndex(d.group, index) < 0) {
-	  			return this.getAttribute("x2");
-	  		}
-	  		
-	  		if (index == 0) {
-	  			return barWidth;
-	  		}
-	  		return barWidth + (index * (barPaddingVertical + barWidth));
-	  	})
-	  	.attr("y1", function(d,i) { return (barHight/2) + (i * (barHight + barPaddingHorizontal)); })
-	  	.attr("y2", function(d,i) {
-	  		// if no item of the same group in next column, set y2 same as y1
-	  		var nextIndex = getNextIndex(d.group, index);
-	  		if(nextIndex < 0) {
-	  			return this.getAttribute("y1");
-	  		}
-	  		return (barHight/2) + (nextIndex * (barHight + barPaddingHorizontal));
-	  		
-	  	})
+	  	.append("path")	
+	  	.attr("d", function(d, i) {return lineFunction(getPathCoords(index, d, i))})
 	  	.attr("class", function(d, i) {return "grp" + d.group})
-	  	.attr("src", function(d,i) {  return 1; })
-		.attr("trgt", function(d,i) {  return 0; })
 	  	.style("stroke", colorMediumBrown);
 }
 
+function getPathCoords(index, d, i) {
+	var x2 = (index + 1) * (barWidth + barPaddingVertical);
+	var x1 = function(d,i) {
+		  		// if no item of the same group in next column, set x1 same as x2 to hide the line
+		  		if(getNextIndex(d.group, index) < 0) {
+		  			return x2;
+		  		}
+		  		
+		  		if (index == 0) {
+		  			return barWidth;
+		  		}
+		  		return barWidth + (index * (barPaddingVertical + barWidth));
+		  	}(d, i);
+	var y1 = (barHight/2) + (i * (barHight + barPaddingHorizontal));
+	var y2 = function(d,i) {
+	  		// if no item of the same group in next column, set y2 same as y1
+	  		var nextIndex = getNextIndex(d.group, index);
+	  		if(nextIndex < 0) {
+	  			return y1;
+	  		}
+	  		return (barHight/2) + (nextIndex * (barHight + barPaddingHorizontal));
+	  	}(d, i);
+	return [{"x": x1, "y": y1}, {"x": x2, "y": y2}];
+}
 
 function getNextIndex(group, index) {
 	var ret = -1;
-	dataset.books[index+1].forEach(function(d, i) {
+	for (var i = 0; i < dataset.books[index+1].length; i++) {
+		var d = dataset.books[index+1][i];
 		if (d.group == group) {
 			ret = i;
 		}
-	});
-	return ret;	
+	};
+	return ret;
 }
