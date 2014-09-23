@@ -67,8 +67,6 @@ for (var i=0; i<dataset.books.length; i++) {
 	};
 };
 
-console.log(groupCoordinates);
-console.log(groupCount);
 
 //Create SVG element
 var svg = d3.select("body")
@@ -76,10 +74,30 @@ var svg = d3.select("body")
 			.attr("width", w)
 			.attr("height", h);
 
+var drag = d3.behavior.drag()
+			.origin(function() {
+				var g = this;//.parentNode;
+				return {x: d3.transform(g.getAttribute("transform")).translate[0],
+						y: d3.transform(g.getAttribute("transform")).translate[1]};
+			})
+			.on("drag", function(d,i) {
+				g = this;  //.parentNode;
+				translate = d3.transform(g.getAttribute("transform")).translate;
+				x = d3.event.dx + translate[0],
+				y = d3.event.dy + translate[1];
+				d3.select(g).attr("transform", "translate(" + 0 + "," + y + ")");
+				d3.event.sourceEvent.stopPropagation();
+			});
+
+// each book consisting of boxes, texts, paths, etc. in one group
+var groups = [];
+for (var index=0; index<dataset.books.length; index++) {
+	groups.push(svg.append("g").call(drag).attr("transform", "translate(0, 0)"));
+}
 
 // Drawing the boxes
 for (var index=0; index<dataset.books.length; index++) {
-	svg.selectAll("rect.i" + index)
+	groups[index].selectAll("rect.i" + index)
 	   .data(dataset.books[index])
 	   .enter()
 	   .append("rect")
@@ -111,7 +129,7 @@ for (var index=0; index<dataset.books.length; index++) {
 
 // Adding text to the boxes
 for (var index=0; index<dataset.books.length; index++) {
-	svg.selectAll("text.i" + index)
+	groups[index].selectAll("text.i" + index)
 		.data(dataset.books[index])
 	   	.enter()
 	   	.append("text")
@@ -137,7 +155,7 @@ var lineFunction = d3.svg.line()
 
 // Drawing the lines
 for (var index=0; index<dataset.books.length-1; index++) {
-	svg.selectAll("path.i" + index)
+	groups[index].selectAll("path.i" + index)
 		.data(dataset.books[index])
 	  	.enter()
 	  	.append("path")	
