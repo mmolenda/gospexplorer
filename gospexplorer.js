@@ -1,3 +1,7 @@
+
+// author: Marcin Molenda <spamm@molenda.eu>
+// since: 09/16/2014
+
 //Width and height
 var w = 1200;
 var h = 500;
@@ -100,15 +104,27 @@ var drag = d3.behavior.drag().origin(function () {
     y = d3.event.dy + translate[1];
 
     // each group holds link ID (link-[0-3]) under "link" attr for matching paths
-    //var linkClass = d3.select(g).attr("link");
-    // TODO: deal with paths' movement
-    // console.log(d3.selectAll("path." + linkClass));
-    // d3.selectAll("." + linkClass).style("stroke", "red").style("stroke-width", 3);
+    var linkClass = d3.select(g).attr("link");
+    var index = parseInt(linkClass.split("-")[1]);
+
+    // adding to associated paths' coordinates    
+    var paths = d3.selectAll("." + linkClass)[0];
+    for (var i=0; i<paths.length; i++) {
+        var path = d3.select(paths[i]);
+        var originalCoords = path.attr("d");
+        path.attr("d", movePathBeginning(index, originalCoords, d3.event.dy));
+    }
 
     // Only allow vertical movement
     d3.select(g).attr("transform", "translate(" + 0 + "," + y + ")");
     d3.event.sourceEvent.stopPropagation();
 });
+
+function movePathBeginning(index, originalCoords, delta) {
+    var bits = originalCoords.split(",");
+    bits[bits.length-1] = parseInt(bits[bits.length-1]) + delta;
+    return bits.join(",");
+}
 
 // each book consisting of boxes and texts is in separate group
 var groups = [];
