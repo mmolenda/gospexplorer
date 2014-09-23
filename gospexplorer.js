@@ -56,151 +56,156 @@ var dataset = {
 var groupCoordinates = {};
 var groupCount = {};
 
-for (var i=0; i<dataset.books.length; i++) {
-	var book = dataset.books[i];
-	for (var j=0; j<book.length; j++) {
-		var div = book[j];
-		if (groupCount[div.group] === undefined) {groupCount[div.group] = 0}
-		if (groupCoordinates[div.group] === undefined) {groupCoordinates[div.group] = [null, null, null, null]}
-		groupCount[div.group]++;
-		groupCoordinates[div.group][i] = j;
-	};
+for (var i = 0; i < dataset.books.length; i++) {
+    var book = dataset.books[i];
+    for (var j = 0; j < book.length; j++) {
+        var div = book[j];
+        if (groupCount[div.group] === undefined) {
+            groupCount[div.group] = 0
+        }
+        if (groupCoordinates[div.group] === undefined) {
+            groupCoordinates[div.group] = [null, null, null, null]
+        }
+        groupCount[div.group]++;
+        groupCoordinates[div.group][i] = j;
+    };
 };
 
 
 //Create SVG element
-var svg = d3.select("body")
-			.append("svg")
-			.attr("width", w)
-			.attr("height", h);
+var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);
 
-var drag = d3.behavior.drag()
-			.origin(function() {
-				var g = this;//.parentNode;
-				return {x: d3.transform(g.getAttribute("transform")).translate[0],
-						y: d3.transform(g.getAttribute("transform")).translate[1]};
-			})
-			.on("drag", function(d,i) {
-				g = this;  //.parentNode;
-				translate = d3.transform(g.getAttribute("transform")).translate;
-				x = d3.event.dx + translate[0],
-				y = d3.event.dy + translate[1];
-				d3.select(g).attr("transform", "translate(" + 0 + "," + y + ")");
-				d3.event.sourceEvent.stopPropagation();
-			});
+var drag = d3.behavior.drag().origin(function () {
+    var g = this; //.parentNode;
+    return {
+        x: d3.transform(g.getAttribute("transform")).translate[0],
+        y: d3.transform(g.getAttribute("transform")).translate[1]
+    };
+}).on("drag", function (d, i) {
+    g = this; //.parentNode;
+    translate = d3.transform(g.getAttribute("transform")).translate;
+    x = d3.event.dx + translate[0], y = d3.event.dy + translate[1];
+    d3.select(g).attr("transform", "translate(" + 0 + "," + y + ")");
+    d3.event.sourceEvent.stopPropagation();
+});
 
 // each book consisting of boxes, texts, paths, etc. in one group
 var groups = [];
-for (var index=0; index<dataset.books.length; index++) {
-	groups.push(svg.append("g").call(drag).attr("transform", "translate(0, 0)"));
+for (var index = 0; index < dataset.books.length; index++) {
+    groups.push(svg.append("g").call(drag).attr("transform", "translate(0, 0)"));
 }
 
 // Drawing the boxes
-for (var index=0; index<dataset.books.length; index++) {
-	groups[index].selectAll("rect.i" + index)
-	   .data(dataset.books[index])
-	   .enter()
-	   .append("rect")
-	   .attr("x", function(d, i) {
-	   		return barPaddingVertical + (index * (barWidth + barPaddingVertical));
-	   })
-	   .attr("y", function(d, i) {
-	   		return i * (barHight + barPaddingHorizontal);
-	   })
-	   .attr("width", barWidth)
-	   .attr("height", barHight)
-	   .attr("class", function(d, i) {return "grp" + d.group})
-	   .attr("fill", function(d, i) {
-			return frequencyColors[groupCount[d.group]];
-	   })
-	   .style("stroke", colorMediumBrown)
-	    .on("mouseover", function(){
-	    	d3.selectAll("." + this.getAttribute("class")).style("stroke", colorDarkBrown);
-	    	d3.selectAll("." + this.getAttribute("class")).style("stroke-width", 3);
-	     })
-	    .on("mouseclick", function(){
-	    	d3.selectAll("." + this.getAttribute("class")).style("stroke", colorDarkBrown);
-	     })
-	    .on("mouseout", function(){
-	      d3.selectAll("." + this.getAttribute("class")).style("stroke", colorMediumBrown);
-	    	d3.selectAll("." + this.getAttribute("class")).style("stroke-width", 1);
-	    });
+for (var index = 0; index < dataset.books.length; index++) {
+    groups[index].selectAll("rect.i" + index).data(dataset.books[index]).enter().append("rect").attr("x", function (d, i) {
+        return barPaddingVertical + (index * (barWidth + barPaddingVertical));
+    }).attr("y", function (d, i) {
+        return i * (barHight + barPaddingHorizontal);
+    }).attr("width", barWidth).attr("height", barHight).attr("class", function (d, i) {
+        return "grp-" + d.group
+    }).attr("fill", function (d, i) {
+        return frequencyColors[groupCount[d.group]];
+    }).style("stroke", colorMediumBrown).on("mouseover", function () {
+        d3.selectAll("." + this.getAttribute("class")).style("stroke", colorDarkBrown);
+        d3.selectAll("." + this.getAttribute("class")).style("stroke-width", 3);
+    }).on("mouseclick", function () {
+        d3.selectAll("." + this.getAttribute("class")).style("stroke", colorDarkBrown);
+    }).on("mouseout", function () {
+        d3.selectAll("." + this.getAttribute("class")).style("stroke", colorMediumBrown);
+        d3.selectAll("." + this.getAttribute("class")).style("stroke-width", 1);
+    });
 }
 
 // Adding text to the boxes
-for (var index=0; index<dataset.books.length; index++) {
-	groups[index].selectAll("text.i" + index)
-		.data(dataset.books[index])
-	   	.enter()
-	   	.append("text")
-	   	.text(function(d) {
-   			return d.title;
-	   	})
-	   	.attr("text-anchor", "left")
-	   	.attr("x", function(d, i) {
-   			return barPaddingVertical + (index * (barWidth + barPaddingVertical)) + 5;
-	   	})
-	   	.attr("y", function(d, i) {
-   			return i * (barHight + barPaddingHorizontal) + (barHight * 0.6);
-	   	})
-	   	.attr("font-family", "sans-serif")
-	   	.attr("font-size", "11px")
-	   	.attr("fill", colorMediumBrown);
+for (var index = 0; index < dataset.books.length; index++) {
+    groups[index].selectAll("text.i" + index).data(dataset.books[index]).enter().append("text").text(function (d) {
+        return d.title;
+    }).attr("text-anchor", "left").attr("x", function (d, i) {
+        return barPaddingVertical + (index * (barWidth + barPaddingVertical)) + 5;
+    }).attr("y", function (d, i) {
+        return i * (barHight + barPaddingHorizontal) + (barHight * 0.6);
+    }).attr("font-family", "sans-serif").attr("font-size", "11px").attr("fill", colorMediumBrown);
 }
 
-var lineFunction = d3.svg.line()
-		.x(function(d) { return d.x; })
-		.y(function(d) { return d.y; })
-		.interpolate("linear");
+var lineFunction = d3.svg.line().x(function (d) {
+    return d.x;
+}).y(function (d) {
+    return d.y;
+}).interpolate("linear");
 
 // Drawing the lines
-for (var index=0; index<dataset.books.length-1; index++) {
-	groups[index].selectAll("path.i" + index)
-		.data(dataset.books[index])
-	  	.enter()
-	  	.append("path")	
-	  	.attr("d", function(d, i) {return lineFunction(getPathCoords(index, d, i))})
-	  	.attr("class", function(d, i) {return "grp" + d.group})
-	  	.style("stroke", colorMediumBrown)
-	  	.attr("fill", "none");
+for (var index = 0; index < dataset.books.length - 1; index++) {
+    svg.selectAll("path.i" + index).data(dataset.books[index]).enter().append("path").attr("d", function (d, i) {
+        return lineFunction(getPathCoords(index, d, i))
+    })
+    // .attr("class", function(d, i) {return "grp-" + d.group})
+    .attr("class", function (d, i) {
+        var classes = "grp-" + d.group;
+        nc = getNextCoordinates(d.group, index);
+        classes += " link-" + index;
+        if (nc) classes += " link-" + nc["x"];
+        return classes;
+    }).style("stroke", colorMediumBrown).attr("fill", "none");
 }
 
 function getPathCoords(index, d, i) {
-	var nextCoordinates = getNextCoordinates(d.group, index);
-	if (nextCoordinates == null) {
-		return [{"x": 0, "y": 0}, {"x": 0, "y": 0}];
-	}
-	var x1 = (index + 1) * (barPaddingVertical + barWidth);
-	var x2 = barPaddingVertical + ((nextCoordinates["x"]) * (barPaddingVertical + barWidth));
-	var y1 = (barHight/2) + (i * (barHight + barPaddingHorizontal));
-	var y2 = (barHight/2) + ((nextCoordinates["y"]) * (barHight + barPaddingHorizontal));
+    var nextCoordinates = getNextCoordinates(d.group, index);
+    if (nextCoordinates == null) {
+        return [{
+            "x": 0,
+            "y": 0
+        }, {
+            "x": 0,
+            "y": 0
+        }];
+    }
+    var x1 = (index + 1) * (barPaddingVertical + barWidth);
+    var x2 = barPaddingVertical + ((nextCoordinates["x"]) * (barPaddingVertical + barWidth));
+    var y1 = (barHight / 2) + (i * (barHight + barPaddingHorizontal));
+    var y2 = (barHight / 2) + ((nextCoordinates["y"]) * (barHight + barPaddingHorizontal));
 
-	var pathCoordinates = [{"x": x1, "y": y1}, {"x": x2, "y": y2}];
-	// bend the line by adding two additional points, if distance > 1
-	var distance = nextCoordinates["x"] - index;
-	if (distance > 1) {
-		leftx = x1 + barPaddingVertical;
-		lefty = y1 - (barHight / 2) - (barPaddingHorizontal / 2);
-		rightx = x2 - barPaddingVertical;
-		righty = lefty;
-		pathCoordinates = [pathCoordinates[0], {"x": leftx, "y": lefty}, {"x": rightx, "y": righty}, pathCoordinates[1]]
+    var pathCoordinates = [{
+        "x": x1,
+        "y": y1
+    }, {
+        "x": x2,
+        "y": y2
+    }];
+    // bend the line by adding two additional points, if distance > 1
+    var distance = nextCoordinates["x"] - index;
+    if (distance > 1) {
+        leftx = x1 + barPaddingVertical;
+        lefty = y1 - (barHight / 2) - (barPaddingHorizontal / 2);
+        rightx = x2 - barPaddingVertical;
+        righty = lefty;
+        pathCoordinates = [pathCoordinates[0],
+        {
+            "x": leftx,
+            "y": lefty
+        }, {
+            "x": rightx,
+            "y": righty
+        },
+        pathCoordinates[1]]
 
 
-	}
-	return pathCoordinates;
+    }
+    return pathCoordinates;
 }
 
 function getNextCoordinates(group, index) {
-	var ret = null;
-	if (index > 2) {
-		return ret;
-	}
-	var nextCoordinates = groupCoordinates[group];
-	// console.log("nextcoord", nextCoordinates);
-	for (var x=index+1; x<nextCoordinates.length; x++) {
-		if (nextCoordinates[x] != null) {
-			return {"x": x, "y": nextCoordinates[x]};
-		}
-	}
-	return ret;
+    var ret = null;
+    if (index > 2) {
+        return ret;
+    }
+    var nextCoordinates = groupCoordinates[group];
+    for (var x = index + 1; x < nextCoordinates.length; x++) {
+        if (nextCoordinates[x] != null) {
+            return {
+                "x": x,
+                "y": nextCoordinates[x]
+            };
+        }
+    }
+    return ret;
 }
