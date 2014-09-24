@@ -19,7 +19,7 @@ var colorMediumBrown = "rgb(201, 115, 68)";
 var colorDarkBrown = "rgb(94, 33, 0)";
 
 var frequencyColors = {
-    1: "#F7F2E0",
+    1: "#FFF",
     2: "#F5ECCE",
     3: "#F3E2A9",
     4: "#F5DA81",
@@ -45,7 +45,7 @@ var dataset = {
             {"id": "3.1", "div": DIV_PARAGRAPH, "title": "Nawiedzenie", "group": 7},
             {"id": "3.3", "div": DIV_PARAGRAPH, "title": "Jan", "group": 3},
             {"id": "3.2", "div": DIV_PARAGRAPH, "title": "Narodzenie", "group": 2},
-            {"id": "3.4", "div": DIV_PARAGRAPH, "title": "Post", "group": 4}
+            {"id": "3.4", "div": DIV_PARAGRAPH, "title": "Jalmuzna", "group": 5}
         ],
         [
             {"id": "4.1", "div": DIV_PARAGRAPH, "title": "Nawiedzenie", "group": 7},
@@ -275,7 +275,7 @@ for (var index=0; index<dataset.books.length-1; index++) {
 function getPathCoords(index, d, i) {
     var nextCoordinates = getNextCoordinates(d.group, index);
     if (nextCoordinates == null) {
-        return [{"x": 0, "y": 0}, {"x": 0, "y": 0}];
+        return [{"x": -1, "y": -1}, {"x": -1, "y": -1}];
     }
     var x1 = (index + 1) * (barPaddingVertical + barWidth);
     var x2 = barPaddingVertical + ((nextCoordinates["x"]) * (barPaddingVertical + barWidth));
