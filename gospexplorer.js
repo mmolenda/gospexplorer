@@ -112,9 +112,7 @@ var drag = d3.behavior.drag().origin(function () {
     for (var i=0; i<paths.length; i++) {
         var path = d3.select(paths[i]);
         var originalCoords = path.attr("d");
-        // TODO keep link-* in more safe fashion, not extract from classes
-        var endpointIndex = path.attr("class").split("-").slice(-1).pop();
-        path.attr("d", movePathTip(index, endpointIndex, originalCoords, d3.event.dy));
+        path.attr("d", movePathTip(index, path.attr("endpointIndex"), originalCoords, d3.event.dy));
     }
 
     // Only allow vertical movement
@@ -144,6 +142,7 @@ function movePathTip(index, endpointIndex, originalCoords, dy) {
             bitStop[1] = parseInt(bitStop[1]) + dy;
             bits[bits.length-1] = bitStop.join(",");
         } else {
+            // path on the right - changing starting point
             bitStart[1] = parseInt(bitStart[1]) + dy;
             bits[0] = bitStart.join(",");
         }
@@ -184,6 +183,8 @@ for (var index=0; index<dataset.books.length; index++) {
         .attr("width", barWidth)
         .attr("height", barHight)
         .attr("class", function (d, i) {
+            // Related boxes and paths belong to the same group;
+            // for highlighting purposes
             return "grp-" + d.group
         })
         .attr("fill", function (d, i) {
@@ -248,13 +249,8 @@ for (var index=0; index<dataset.books.length-1; index++) {
             return lineFunction(getPathCoords(index, d, i))
         })
         .attr("class", function (d, i) {
-            // WARNING !!!
-            // bending mechanism relies on link- classes; last class of this object
-            // must be the higher link- class
-            // add new classes carefuly
-            // WARNING !!!
-            // grp-* for keeping track of disjoined
-            // paths related to the same group
+            // Related boxes and paths belong to the same group;
+            // for highlighting purposes
             var classes = "grp-" + d.group;
             nc = getNextCoordinates(d.group, index);
             // link-* for keeping track of paths ending on
@@ -262,6 +258,11 @@ for (var index=0; index<dataset.books.length-1; index++) {
             classes += " link-" + index;
             if (nc) classes += " link-" + nc["x"];
             return classes;
+        })
+        .attr("endpointIndex", function(d, i) {
+            // x index of a box to which the path is pointing to
+            nc = getNextCoordinates(d.group, index);
+            return (nc) ? nc["x"] : index;
         })
         .style("stroke", colorLightBrown)
         .attr("fill", "none");
