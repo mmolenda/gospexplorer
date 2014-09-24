@@ -103,8 +103,3 @@ PO ZMARTWYCHWSTANIU
 21.15 Piotr otrzymuje władzę pasterską
 21.20 Odmienny los umiłowanego ucznia
 21.24 Drugi epilog - Ewangelii
-
-Dzieje Apostolskie (Dz)
-Listy Apostolskie
-Apokalipsa św. Jana (Ap)
-

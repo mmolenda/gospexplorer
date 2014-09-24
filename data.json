@@ -1,0 +1,28 @@
+[
+    [
+        {"title": "Rodowód", "group": 1},
+        {"title": "Narodzenie", "group": 2},
+        {"title": "Jan", "group": 3},
+        {"title": "Wnieb", "group": 9},
+        {"title": "Post", "group": 4}
+    ],
+    [
+        {"title": "Narodzenie", "group": 2},
+        {"title": "Modlitwa", "group": 6},
+        {"title": "Jan2", "group": 8},
+        {"title": "Jałmużna", "group": 5},
+        {"title": "Post", "group": 4}
+    ],
+    [
+        {"title": "Nawiedzenie", "group": 7},
+        {"title": "Jan", "group": 3},
+        {"title": "Narodzenie", "group": 2},
+        {"title": "Jalmuzna", "group": 5}
+    ],
+    [
+        {"title": "Nawiedzenie", "group": 7},
+        {"title": "Narodzenie", "group": 2},
+        {"title": "Wnieb", "group": 9},
+        {"title": "Post", "group": 4}
+    ]
+]

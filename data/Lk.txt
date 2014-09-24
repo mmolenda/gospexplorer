@@ -41,8 +41,8 @@ DZIAŁALNOŚĆ JEZUSA W GALILEI
 POCZĄTEK DZIAŁALNOŚCI
 4.14 Pierwsze wystąpienie
 4.16 Jezus w Nazarecie
-4.31 Jezus w Kafarnaum
-Uzdrowienie opętanego
+4.31 Jezus w Kafarnaum 
+4.33 Uzdrowienie opętanego
 4.38 W domu Piotra
 4.42 Jezus opuszcza Kafarnaum
 5.1 Nauczanie z łodzi
@@ -231,9 +231,4 @@ JEZUS PRZED SWOIMI SĘDZIAMI
 24.44 Ostatnie pouczenia
 24.50 Wniebowstąpienie
 24.52 Zakończenie
-
-Ew. św. Jana (J)
-Dzieje Apostolskie (Dz)
-Listy Apostolskie
-Apokalipsa św. Jana (Ap)
 
