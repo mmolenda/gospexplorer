@@ -120,10 +120,36 @@ var drag = d3.behavior.drag().origin(function () {
     d3.event.sourceEvent.stopPropagation();
 });
 
-function movePathBeginning(index, originalCoords, delta) {
-    var bits = originalCoords.split(",");
-    bits[bits.length-1] = parseInt(bits[bits.length-1]) + delta;
-    return bits.join(",");
+function movePathBeginning(index, originalCoords, dy) {
+    var originalCoordsTrimmed = originalCoords.slice(1);
+    var bits = originalCoordsTrimmed.split("L");
+
+    if (index == 0) {
+        var bit = bits[0].split(",");
+        bit[1] = parseInt(bit[1]) + dy;
+        bits[0] = bit.join(",");
+    } else if (index == 3) {
+        var bit = bits[bits.length-1].split(",");
+        bit[1] = parseInt(bit[1]) + dy;
+        bits[bits.length-1] = bit.join(",");
+    } else {
+        // first point
+        var bitStart = bits[0].split(",");
+        var bitStop = bits[bits.length-1].split(",");
+
+        // TODO: figure out if a path is on the left or the right side of moved group
+        if (true) {
+            // path on the left - changing end point
+            bitStop[1] = parseInt(bitStop[1]) + dy;
+            bits[bits.length-1] = bitStop.join(",");
+        } else {
+            bitStart[1] = parseInt(bitStart[1]) + dy;
+            bits[0] = bitStart.join(",");
+        }
+    }
+
+    // console.log(originalCoords, '----', bits, '----', "M" + bits.join("L"));
+    return "M" + bits.join("L");
 }
 
 // each book consisting of boxes and texts is in separate group
