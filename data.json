@@ -20,7 +20,8 @@
         {"title": "Nawiedzenie", "group": [7]},
         {"title": "Jan", "group": [3]},
         {"title": "Narodzenie", "group": [2]},
-        {"title": "Jalmuzna", "group": [5]}
+        {"title": "Jalmuzna", "group": [5]},
+        {"title": "W3", "group": [10, 11]}
     ],
     [
         {"title": "Nawiedzenie", "group": [7]},

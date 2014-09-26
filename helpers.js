@@ -49,32 +49,32 @@ function movePathTip(index, endpointIndex, originalCoords, dy) {
 //    if next element of the group is in the remote book thus the nearest book needs to be skipped
 function getPathCoordinates(groupCoordinates, index, d, i) {
     // TODO: Multiple lines; group[0] currently fixed
-    var nextCoordinates = getNextCoordinates(groupCoordinates, d.group[0], index);
+    var nextCoordinates = getNextCoordinates(groupCoordinates, d.group, index);
     if (nextCoordinates == null) {
         return [{"x": -1, "y": -1}, {"x": -1, "y": -1}];
     }
     var x1 = (index + 1) * (barPaddingVertical + barWidth);
     var x2 = barPaddingVertical + ((nextCoordinates["x"]) * (barPaddingVertical + barWidth));
-    var y1 = (barHeight / 2) + (i * (barHeight + barPaddingHorizontal));
+    var y1 = ((barHeight / 2) + (i * (barHeight + barPaddingHorizontal))) - (d.occurence * (barHeight + barPaddingHorizontal));
     var y2 = (barHeight / 2) + ((nextCoordinates["y"]) * (barHeight + barPaddingHorizontal));
 
     var pathCoordinates = [{"x": x1, "y": y1}, {"x": x2, "y": y2}];
 
     // bend the line by adding two additional points, if distance > 1
-    var distance = nextCoordinates["x"] - index;
-    if (distance > 1) {
-        leftx = x1 + barPaddingVertical;
-        lefty = y1 - (barHeight / 2) - (barPaddingHorizontal / 2);
-        rightx = x2 - barPaddingVertical;
-        righty = lefty;
+    // var distance = nextCoordinates["x"] - index;
+    // if (distance > 1) {
+    //     leftx = x1 + barPaddingVertical;
+    //     lefty = y1 - (barHeight / 2) - (barPaddingHorizontal / 2);
+    //     rightx = x2 - barPaddingVertical;
+    //     righty = lefty;
 
-        pathCoordinates = [
-            pathCoordinates[0],
-            {"x": leftx, "y": lefty},
-            {"x": rightx, "y": righty},
-            pathCoordinates[1]
-        ]
-    }
+    //     pathCoordinates = [
+    //         pathCoordinates[0],
+    //         {"x": leftx, "y": lefty},
+    //         {"x": rightx, "y": righty},
+    //         pathCoordinates[1]
+    //     ]
+    // }
     return pathCoordinates;
 }
 

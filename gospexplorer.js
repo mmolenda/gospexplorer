@@ -188,10 +188,41 @@ function main(dataset) {
     }
 
     // Drawing the lines
-    for (var index=0; index<dataset.length-1; index++) {
+
+    // Other than in case of boxes and texts, dataset for lines must be slightly modified
+    // because list of groups is in this case used not as source for single object's (boxe's, text's) properties
+    // but to generate separate objects. Thus we translate this:
+    //     {"title": "Wnieb", "group": [9]},
+    //     {"title": "Post", "group": [4]},
+    //     {"title": "W1", "group": [10, 11]}
+    // into
+    //     {"title": "Wnieb", "group": 9, "occurence": 0},
+    //     {"title": "Post", "group": 4, "occurence": 0},
+    //     {"title": "W1", "group": 10, "occurence": 0}
+    //     {"title": "W1", "group": 11, "occurence": 1}
+    //
+    // So for each group a separate object is created. Occurence property indicates
+    // the consecutive number of object appearing in the same group. It is used to 
+    // rewind the index so multiple lines can originate from the same point.
+    // index<dataset.length-1 - omitting last column as no line originates from it
+    datasetUnfolded = []
+    for (index=0; index<dataset.length-1; index++) {
+        var book = dataset[index];
+        var bookUnfolded = [];
+        for (i=0; i<book.length; i++) {
+            var div = book[i];
+            for (j=0; j<div.group.length; j++) {
+                bookUnfolded.push({"title": div.title, "group": div.group[j], "occurence": j});
+            }
+        }
+        datasetUnfolded.push(bookUnfolded);
+    }
+
+    // Drawing actual lines using unfolded dataset
+    for (var index=0; index<datasetUnfolded.length; index++) {
         pathGroups[index]
             .selectAll("path.i" + index)
-            .data(dataset[index])
+            .data(datasetUnfolded[index])
             .enter()
             .append("path")
             .attr("d", function (d, i) {
@@ -202,20 +233,18 @@ function main(dataset) {
                 var classes = [];
                 // // Related boxes and paths belong to the same group;
                 // // for highlighting purposes
-                for (var i=0; i<d.group.length; i++) {
-                    classes.push("grp-" + d.group[i]);
-                    var nc = getNextCoordinates(groupCoordinates, d.group[i], index);
-                    // link-* for keeping track of paths ending on
-                    // and starting on a certain boxes
-                    classes.push("link-" + index);
-                    if (nc) classes.push("link-" + nc["x"]);
-                }
+                classes.push("grp-" + d.group);
+                var nc = getNextCoordinates(groupCoordinates, d.group, index);
+                // link-* for keeping track of paths ending on
+                // and starting on a certain boxes
+                classes.push("link-" + index);
+                if (nc) classes.push("link-" + nc["x"]);
                 return classes.join(" ");
             })
             .attr("endpointIndex", function(d, i) {
                 // x index of a box to which the path is pointing to
                 // TODO: Multiple lines; group[0] currently fixed
-                nc = getNextCoordinates(groupCoordinates, d.group[0], index);
+                nc = getNextCoordinates(groupCoordinates, d.group, index);
                 return (nc) ? nc["x"] : index;
             })
             .style("stroke", colorLightBrown)
