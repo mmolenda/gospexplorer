@@ -25,7 +25,7 @@ var frequencyColors = {
     4: "#F5DA81",
 }
 
-d3.json("/data2.json", function(dataset) {
+d3.json("/data.json", function(dataset) {
     main(dataset);
 });
 
@@ -48,17 +48,21 @@ function main(dataset) {
         var book = dataset[i];
         for (var j=0; j<book.length; j++) {
             var div = book[j];
-            if (groupCount[div.group] === undefined) {
-                groupCount[div.group] = 0
+            for (var k=0; k<div.group.length; k++) {
+                var group = div.group[k];
+                if (groupCount[group] === undefined) {
+                    groupCount[group] = 0
+                }
+                if (groupCoordinates[group] === undefined) {
+                    groupCoordinates[group] = [null, null, null, null]
+                }
+                groupCount[group]++;
+                groupCoordinates[group][i] = j;
             }
-            if (groupCoordinates[div.group] === undefined) {
-                groupCoordinates[div.group] = [null, null, null, null]
-            }
-            groupCount[div.group]++;
-            groupCoordinates[div.group][i] = j;
         };
     };
-    console.log(groupCount);
+    // console.log(groupCount);
+    // console.log(groupCoordinates);
 
     //Create SVG element
     var svg = d3.select("body")
@@ -129,24 +133,35 @@ function main(dataset) {
             .attr("height", barHeight)
             .attr("group", function(d, i) {return d.group;})
             .attr("class", function (d, i) {
+                var classes = [];
                 // // Related boxes and paths belong to the same group;
                 // // for highlighting purposes
-                return "grp-" + d.group;
+                for (var i=0; i<d.group.length; i++) {
+                    classes.push("grp-" + d.group[i]);
+                }
+                return classes.join(" ");
             })
             .attr("fill", function (d, i) {
-                return (d.group) ? frequencyColors[groupCount[d.group]] : colorWhite;
+                // for more than one group coloring according to one with highest number of occurencies
+                var groupCounts = [];
+                for(i=0; i<d.group.length; i++) {
+                    groupCounts.push(groupCount[d.group[i]]);
+                }
+                return (d.group) ? frequencyColors[Math.max.apply(Math, groupCounts)] : colorWhite;
             })
             .style("stroke", colorLightBrown)
-            .on("mouseover", function () {
-                d3.selectAll(".grp-" + this.getAttribute("group")).style("stroke", colorDarkBrown);
-                d3.selectAll(".grp-" + this.getAttribute("group")).style("stroke-width", 2);
+            .on("mouseover", function (d, i) {
+                for(i=0; i<d.group.length; i++) {
+                    d3.selectAll(".grp-" + d.group[i]).style("stroke", colorDarkBrown);
+                    d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 2);
+                }
             })
-            .on("mouseclick", function () {
-                d3.selectAll(".grp-" + this.getAttribute("group")).style("stroke", colorDarkBrown);
-            })
-            .on("mouseout", function () {
-                d3.selectAll(".grp-" + this.getAttribute("group")).style("stroke", colorLightBrown);
-                d3.selectAll(".grp-" + this.getAttribute("group")).style("stroke-width", 1);
+            .on("mouseout", function (d, i) {
+                var classes = [];
+                for(i=0; i<d.group.length; i++) {
+                    d3.selectAll(".grp-" + d.group[i]).style("stroke", colorLightBrown);
+                    d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 1);
+                }
             });
     }
 
@@ -180,25 +195,31 @@ function main(dataset) {
             .enter()
             .append("path")
             .attr("d", function (d, i) {
+                // TODO: Multiple lines
                 return lineFunction(getPathCoordinates(groupCoordinates, index, d, i))
             })
             .attr("class", function (d, i) {
-                // Related boxes and paths belong to the same group;
-                // for highlighting purposes
-                var classes = "grp-" + d.group;
-                nc = getNextCoordinates(groupCoordinates, d.group, index);
-                // link-* for keeping track of paths ending on
-                // and starting on a certain boxes
-                classes += " link-" + index;
-                if (nc) classes += " link-" + nc["x"];
-                return classes;
+                var classes = [];
+                // // Related boxes and paths belong to the same group;
+                // // for highlighting purposes
+                for (var i=0; i<d.group.length; i++) {
+                    classes.push("grp-" + d.group[i]);
+                    var nc = getNextCoordinates(groupCoordinates, d.group[i], index);
+                    // link-* for keeping track of paths ending on
+                    // and starting on a certain boxes
+                    classes.push("link-" + index);
+                    if (nc) classes.push("link-" + nc["x"]);
+                }
+                return classes.join(" ");
             })
             .attr("endpointIndex", function(d, i) {
                 // x index of a box to which the path is pointing to
-                nc = getNextCoordinates(groupCoordinates, d.group, index);
+                // TODO: Multiple lines; group[0] currently fixed
+                nc = getNextCoordinates(groupCoordinates, d.group[0], index);
                 return (nc) ? nc["x"] : index;
             })
             .style("stroke", colorLightBrown)
             .attr("fill", "none");
     }
 }
+

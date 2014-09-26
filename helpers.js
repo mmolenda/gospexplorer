@@ -48,7 +48,8 @@ function movePathTip(index, endpointIndex, originalCoords, dy) {
 // * Returns [{"x": n, "y": n}, {..}, {..} {"x": n, "y": n}] (with two additional points in the middle)
 //    if next element of the group is in the remote book thus the nearest book needs to be skipped
 function getPathCoordinates(groupCoordinates, index, d, i) {
-    var nextCoordinates = getNextCoordinates(groupCoordinates, d.group, index);
+    // TODO: Multiple lines; group[0] currently fixed
+    var nextCoordinates = getNextCoordinates(groupCoordinates, d.group[0], index);
     if (nextCoordinates == null) {
         return [{"x": -1, "y": -1}, {"x": -1, "y": -1}];
     }
