@@ -55,7 +55,7 @@ function getPathCoordinates(groupCoordinates, index, d, i) {
     }
     var x1 = (index + 1) * (barPaddingVertical + barWidth);
     var x2 = barPaddingVertical + ((nextCoordinates["x"]) * (barPaddingVertical + barWidth));
-    var y1 = ((barHeight / 2) + (i * (barHeight + barPaddingHorizontal))) - (d.occurence * (barHeight + barPaddingHorizontal));
+    var y1 = ((barHeight / 2) + (i * (barHeight + barPaddingHorizontal)));
     var y2 = (barHeight / 2) + ((nextCoordinates["y"]) * (barHeight + barPaddingHorizontal));
 
     var pathCoordinates = [{"x": x1, "y": y1}, {"x": x2, "y": y2}];

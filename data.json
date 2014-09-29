@@ -10,11 +10,11 @@
     [
         {"title": "Narodzenie", "group": [2]},
         {"title": "Modlitwa", "group": [6]},
+        {"title": "W2", "group": [11]},
         {"title": "Jan2", "group": [8]},
         {"title": "Jałmużna", "group": [5]},
         {"title": "Post", "group": [4]},
-        {"title": "W1", "group": [10]},
-        {"title": "W2", "group": [11]}
+        {"title": "W1", "group": [10]}
     ],
     [
         {"title": "Nawiedzenie", "group": [7]},

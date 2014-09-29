@@ -4,7 +4,7 @@
 
 
 var barPaddingHorizontal = 10;
-var barPaddingVertical = 60;
+var barPaddingVertical = 90;
 var barWidth = 200;
 var barHeight = 20;
 var labelOffsetVertical = 10;
@@ -25,7 +25,7 @@ var frequencyColors = {
     4: "#F5DA81",
 }
 
-d3.json("/data.json", function(dataset) {
+d3.json("/data2.json", function(dataset) {
     main(dataset);
 });
 
@@ -150,19 +150,9 @@ function main(dataset) {
                 return (d.group) ? frequencyColors[Math.max.apply(Math, groupCounts)] : colorWhite;
             })
             .style("stroke", colorLightBrown)
-            .on("mouseover", function (d, i) {
-                for(i=0; i<d.group.length; i++) {
-                    d3.selectAll(".grp-" + d.group[i]).style("stroke", colorDarkBrown);
-                    d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 2);
-                }
-            })
-            .on("mouseout", function (d, i) {
-                var classes = [];
-                for(i=0; i<d.group.length; i++) {
-                    d3.selectAll(".grp-" + d.group[i]).style("stroke", colorLightBrown);
-                    d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 1);
-                }
-            });
+            // .on("click", function(d, i) {console.log(d, i);})
+            .on("mouseover", boxMouseOver)
+            .on("mouseout", boxMouseOut); 
     }
 
     // Adding text to the boxes
@@ -173,7 +163,7 @@ function main(dataset) {
             .enter()
             .append("text")
             .text(function (d) {
-                return truncate(d.title);
+                return truncate(d.ref + " " + d.title);
             })
             .attr("text-anchor", "left")
             .attr("x", function (d, i) {
@@ -184,7 +174,24 @@ function main(dataset) {
             })
             .attr("font-family", "sans-serif")
             .attr("font-size", "11px")
-            .attr("fill", colorMediumBrown);
+            .attr("fill", colorMediumBrown)
+            .on("mouseover", boxMouseOver)
+            .on("mouseout", boxMouseOut); 
+    }
+
+    function boxMouseOver(d, i) {
+        for(i=0; i<d.group.length; i++) {
+            d3.selectAll(".grp-" + d.group[i]).style("stroke", colorDarkBrown);
+            d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 2);
+        }
+    }
+
+    function boxMouseOut(d, i) {
+        var classes = [];
+        for(i=0; i<d.group.length; i++) {
+            d3.selectAll(".grp-" + d.group[i]).style("stroke", colorLightBrown);
+            d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 1);
+        }
     }
 
     // Drawing the lines
@@ -212,7 +219,11 @@ function main(dataset) {
         for (i=0; i<book.length; i++) {
             var div = book[i];
             for (j=0; j<div.group.length; j++) {
-                bookUnfolded.push({"title": div.title, "group": div.group[j], "occurence": j});
+                bookUnfolded.push({"title": div.title,
+                                   "group": div.group[j],
+                                   "occurence": j,
+                                   "ref": div.ref
+                                  });
             }
         }
         datasetUnfolded.push(bookUnfolded);
@@ -220,16 +231,20 @@ function main(dataset) {
 
     // Drawing actual lines using unfolded dataset
     for (var index=0; index<datasetUnfolded.length; index++) {
+        // as number of unfold items is higher than number of boxes, 
+        // counter has to be rewind for extra occurrences
+        var dataIndex = -1;
         pathGroups[index]
             .selectAll("path.i" + index)
             .data(datasetUnfolded[index])
             .enter()
             .append("path")
             .attr("d", function (d, i) {
-                // TODO: Multiple lines
-                return lineFunction(getPathCoordinates(groupCoordinates, index, d, i))
+                if (d.occurence < 1) {dataIndex++;}
+                var lineCoordinates = lineFunction(getPathCoordinates(groupCoordinates, index, d, dataIndex))
+                return lineCoordinates;
             })
-            .attr("class", function (d, i) {
+            .attr("class", function (d) {
                 var classes = [];
                 // // Related boxes and paths belong to the same group;
                 // // for highlighting purposes
@@ -241,7 +256,7 @@ function main(dataset) {
                 if (nc) classes.push("link-" + nc["x"]);
                 return classes.join(" ");
             })
-            .attr("endpointIndex", function(d, i) {
+            .attr("endpointIndex", function(d) {
                 // x index of a box to which the path is pointing to
                 // TODO: Multiple lines; group[0] currently fixed
                 nc = getNextCoordinates(groupCoordinates, d.group, index);
