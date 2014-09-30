@@ -64,6 +64,24 @@ function main(dataset) {
     // console.log(groupCount);
     // console.log(groupCoordinates);
 
+
+    function moveBook(index, eventOffset, offset) {
+        d3.select("g#grp-" + index).attr("transform", "translate(" + 0 + "," + (eventOffset + offset) + ")");
+
+        // adding to associated paths' coordinates    
+        var paths = d3.selectAll(".link-" + index)[0];
+        for (var i=0; i<paths.length; i++) {
+            var path = d3.select(paths[i]);
+            var originalCoords = path.attr("d");
+            path.attr("d", movePathTip(index, path.attr("endpointIndex"), originalCoords, eventOffset));
+        }
+    }
+
+
+    // function moveBook(index, offset) {
+    //     d3.select("g#grp-" + index).attr("transform", "translate(" + 0 + "," + offset + ")");
+    // }
+
     //Create SVG element
     var svg = d3.select("body")
         .append("svg")
@@ -82,20 +100,22 @@ function main(dataset) {
         x = d3.event.dx + translate[0],
         y = d3.event.dy + translate[1];
 
+        console.log(y, d3.event.dy, translate[1]);
+
         // each group holds link ID (link-[0-3]) under "link" attr for matching paths
         var linkClass = d3.select(g).attr("link");
         var index = parseInt(linkClass.split("-")[1]);
 
         // adding to associated paths' coordinates    
-        var paths = d3.selectAll("." + linkClass)[0];
-        for (var i=0; i<paths.length; i++) {
-            var path = d3.select(paths[i]);
-            var originalCoords = path.attr("d");
-            path.attr("d", movePathTip(index, path.attr("endpointIndex"), originalCoords, d3.event.dy));
-        }
+        // var paths = d3.selectAll(".link-" + index)[0];
+        // for (var i=0; i<paths.length; i++) {
+        //     var path = d3.select(paths[i]);
+        //     var originalCoords = path.attr("d");
+        //     path.attr("d", movePathTip(index, path.attr("endpointIndex"), originalCoords, d3.event.dy));
+        // }
 
         // Only allow vertical movement
-        d3.select(g).attr("transform", "translate(" + 0 + "," + y + ")");
+        moveBook(index, d3.event.dy, translate[1]);
         d3.event.sourceEvent.stopPropagation();
     });
 
@@ -111,6 +131,7 @@ function main(dataset) {
 
         groups.push(
             svg.append("g")
+            .attr("id", "grp-" + index)
             .attr("link", "link-" + index)
             .call(drag)
             .attr("transform", "translate(0, 0)"));
@@ -265,5 +286,7 @@ function main(dataset) {
             .style("stroke", colorLightBrown)
             .attr("fill", "none");
     }
+
+
 }
 
