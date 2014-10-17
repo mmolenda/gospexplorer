@@ -72,15 +72,11 @@ function main(dataset) {
         var paths = d3.selectAll(".link-" + index)[0];
         for (var i=0; i<paths.length; i++) {
             var path = d3.select(paths[i]);
-            var originalCoords = path.attr("d");
-            path.attr("d", movePathTip(index, path.attr("endpointIndex"), originalCoords, eventOffset));
+            path.attr("d", movePathTip(index, path.attr("endpointIndex"), path.attr("d"), eventOffset));
+            path.attr("translate", parseInt(path.attr("translate")) + eventOffset);
+            // console.log(path.attr("translate"), eventOffset, "---", offset, eventOffset);
         }
     }
-
-
-    // function moveBook(index, offset) {
-    //     d3.select("g#grp-" + index).attr("transform", "translate(" + 0 + "," + offset + ")");
-    // }
 
     //Create SVG element
     var svg = d3.select("body")
@@ -99,8 +95,6 @@ function main(dataset) {
         translate = d3.transform(g.getAttribute("transform")).translate;
         x = d3.event.dx + translate[0],
         y = d3.event.dy + translate[1];
-
-        console.log(y, d3.event.dy, translate[1]);
 
         // each group holds link ID (link-[0-3]) under "link" attr for matching paths
         var linkClass = d3.select(g).attr("link");
@@ -171,9 +165,19 @@ function main(dataset) {
                 return (d.group) ? frequencyColors[Math.max.apply(Math, groupCounts)] : colorWhite;
             })
             .style("stroke", colorLightBrown)
-            // .on("click", function(d, i) {console.log(d, i);})
             .on("mouseover", boxMouseOver)
-            .on("mouseout", boxMouseOut); 
+            .on("mouseout", boxMouseOut)
+            .on("click", function(d, i) {
+                // adjust other books to clicked one by group
+                for (var book=0; book<dataset.length; book++) {
+                    d3.select("g#grp-" + book).attr("transform", "translate(0,0)");
+                    var index = groupCoordinates[d.group][book];
+                    // do not touch current book and books that don't contain the group
+                    if (d.book == book || index == null) { continue; }
+                    var diff = (i - index) * (barHeight + barPaddingHorizontal);
+                    d3.select("g#grp-" + book).attr("transform", "translate(0," + diff + ")");
+                }
+            }); 
     }
 
     // Adding text to the boxes
@@ -243,7 +247,8 @@ function main(dataset) {
                 bookUnfolded.push({"title": div.title,
                                    "group": div.group[j],
                                    "occurence": j,
-                                   "ref": div.ref
+                                   "ref": div.ref,
+                                   "book": div.book
                                   });
             }
         }
@@ -260,6 +265,7 @@ function main(dataset) {
             .data(datasetUnfolded[index])
             .enter()
             .append("path")
+            .attr("translate", 0)
             .attr("d", function (d, i) {
                 if (d.occurence < 1) {dataIndex++;}
                 var lineCoordinates = lineFunction(getPathCoordinates(groupCoordinates, index, d, dataIndex))
@@ -288,5 +294,9 @@ function main(dataset) {
     }
 
 
-}
+    // var paths = d3.selectAll("path.grp-2")[0];
+    // var path = d3.select(paths[0]);
+    // // path.attr("dupa", 1);
+    // path.attr("transform", "skewY(2)");
 
+}
