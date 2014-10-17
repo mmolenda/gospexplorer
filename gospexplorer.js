@@ -78,6 +78,17 @@ function main(dataset) {
         }
     }
 
+    function resetPaths(index) {
+        var paths = d3.selectAll(".link-" + index)[0];
+        for (var i=0; i<paths.length; i++) {
+            var path = d3.select(paths[i]);
+            var translate = path.attr("translate");
+            console.log(translate);
+            path.attr("d", movePathTip(index, path.attr("endpointIndex"), path.attr("d"), -translate));
+            path.attr("translate", 0);
+        }
+    }
+
     //Create SVG element
     var svg = d3.select("body")
         .append("svg")
@@ -171,6 +182,7 @@ function main(dataset) {
                 // adjust other books to clicked one by group
                 for (var book=0; book<dataset.length; book++) {
                     d3.select("g#grp-" + book).attr("transform", "translate(0,0)");
+                    // resetPaths(book);
                     var index = groupCoordinates[d.group][book];
                     // do not touch current book and books that don't contain the group
                     if (d.book == book || index == null) { continue; }
