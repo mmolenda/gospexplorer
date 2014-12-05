@@ -4,7 +4,7 @@
 
 
 var barPaddingHorizontal = 10;
-var barPaddingVertical = 90;
+var barPaddingVertical = 40;
 var barWidth = 200;
 var barHeight = 20;
 var labelOffsetVertical = 10;
@@ -42,7 +42,6 @@ function main(dataset) {
     // 2: 4
     var groupCount = {};
 
-
     // Filling in groupCoordinates and groupCount dictionaries
     for (var i=0; i<dataset.length; i++) {
         var book = dataset[i];
@@ -67,7 +66,7 @@ function main(dataset) {
     }
 
     //Create SVG element
-    var svg = d3.select("body")
+    var svg = d3.select("#leftpane")
         .append("svg")
         .attr("width", w)
         .attr("height", h);
@@ -140,8 +139,9 @@ function main(dataset) {
             .on("click", function(d, i) {
                 // adjust other books to clicked one by group
                 for (var book=0; book<dataset.length; book++) {
+                    // TODO: prevent books from hiding above the screen
+                    // TODO: change position counting so the clicked book doesn't move at all
                     d3.select("g#grp-" + book).attr("transform", "translate(0,0)");
-                    // resetPaths(book);
                     var index = groupCoordinates[d.group][book];
                     // do not touch current book and books that don't contain the group
                     if (d.book == book || index == null) { continue; }

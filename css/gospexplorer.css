@@ -1,0 +1,20 @@
+
+#rightpane {
+    float: right;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    padding: 11px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 350px;
+    background: #F5ECCE;
+    color: rgb(94, 33, 0);
+}
+
+#leftpane {
+    float: none;
+    overflow: hidden;
+    width: auto;
+}
