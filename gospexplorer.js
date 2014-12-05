@@ -61,12 +61,9 @@ function main(dataset) {
             }
         };
     };
-    // console.log(groupCount);
-    // console.log(groupCoordinates);
 
-
-    function moveBook(index, eventOffset, offset) {
-        d3.select("g#grp-" + index).attr("transform", "translate(" + 0 + "," + (eventOffset + offset) + ")");
+    function moveBook(grp, eventOffset, offset) {
+        d3.select("g#" + grp).attr("transform", "translate(" + 0 + "," + (eventOffset + offset) + ")");
     }
 
     //Create SVG element
@@ -87,8 +84,10 @@ function main(dataset) {
         x = d3.event.dx + translate[0],
         y = d3.event.dy + translate[1];
 
+        var grp = d3.select(g).attr('id')
+
         // Only allow vertical movement
-        moveBook(index, d3.event.dy, translate[1]);
+        moveBook(grp, d3.event.dy, translate[1]);
         d3.event.sourceEvent.stopPropagation();
     });
 
