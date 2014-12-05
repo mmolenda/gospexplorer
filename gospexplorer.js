@@ -67,26 +67,6 @@ function main(dataset) {
 
     function moveBook(index, eventOffset, offset) {
         d3.select("g#grp-" + index).attr("transform", "translate(" + 0 + "," + (eventOffset + offset) + ")");
-
-        // adding to associated paths' coordinates    
-        var paths = d3.selectAll(".link-" + index)[0];
-        for (var i=0; i<paths.length; i++) {
-            var path = d3.select(paths[i]);
-            path.attr("d", movePathTip(index, path.attr("endpointIndex"), path.attr("d"), eventOffset));
-            path.attr("translate", parseInt(path.attr("translate")) + eventOffset);
-            // console.log(path.attr("translate"), eventOffset, "---", offset, eventOffset);
-        }
-    }
-
-    function resetPaths(index) {
-        var paths = d3.selectAll(".link-" + index)[0];
-        for (var i=0; i<paths.length; i++) {
-            var path = d3.select(paths[i]);
-            var translate = path.attr("translate");
-            console.log(translate);
-            path.attr("d", movePathTip(index, path.attr("endpointIndex"), path.attr("d"), -translate));
-            path.attr("translate", 0);
-        }
     }
 
     //Create SVG element
@@ -107,18 +87,6 @@ function main(dataset) {
         x = d3.event.dx + translate[0],
         y = d3.event.dy + translate[1];
 
-        // each group holds link ID (link-[0-3]) under "link" attr for matching paths
-        var linkClass = d3.select(g).attr("link");
-        var index = parseInt(linkClass.split("-")[1]);
-
-        // adding to associated paths' coordinates    
-        // var paths = d3.selectAll(".link-" + index)[0];
-        // for (var i=0; i<paths.length; i++) {
-        //     var path = d3.select(paths[i]);
-        //     var originalCoords = path.attr("d");
-        //     path.attr("d", movePathTip(index, path.attr("endpointIndex"), originalCoords, d3.event.dy));
-        // }
-
         // Only allow vertical movement
         moveBook(index, d3.event.dy, translate[1]);
         d3.event.sourceEvent.stopPropagation();
@@ -126,18 +94,10 @@ function main(dataset) {
 
     // each book consisting of boxes and texts is in separate group
     var groups = [];
-
-    // paths are contained in different groups as:
-    // 1. they shouldn't be moved along with other elements (just firs/last element of each path)
-    // 2. groups for paths should be appended first to make boxes/texts overlay the paths
-    var pathGroups = [];
     for (var index=0; index<dataset.length; index++) {
-        pathGroups.push(svg.append("g"));
-
         groups.push(
             svg.append("g")
             .attr("id", "grp-" + index)
-            .attr("link", "link-" + index)
             .call(drag)
             .attr("transform", "translate(0, 0)"));
     }
@@ -230,85 +190,4 @@ function main(dataset) {
             d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 1);
         }
     }
-
-    // Drawing the lines
-
-    // Other than in case of boxes and texts, dataset for lines must be slightly modified
-    // because list of groups is in this case used not as source for single object's (boxe's, text's) properties
-    // but to generate separate objects. Thus we translate this:
-    //     {"title": "Wnieb", "group": [9]},
-    //     {"title": "Post", "group": [4]},
-    //     {"title": "W1", "group": [10, 11]}
-    // into
-    //     {"title": "Wnieb", "group": 9, "occurence": 0},
-    //     {"title": "Post", "group": 4, "occurence": 0},
-    //     {"title": "W1", "group": 10, "occurence": 0}
-    //     {"title": "W1", "group": 11, "occurence": 1}
-    //
-    // So for each group a separate object is created. Occurence property indicates
-    // the consecutive number of object appearing in the same group. It is used to 
-    // rewind the index so multiple lines can originate from the same point.
-    // index<dataset.length-1 - omitting last column as no line originates from it
-    datasetUnfolded = []
-    for (index=0; index<dataset.length-1; index++) {
-        var book = dataset[index];
-        var bookUnfolded = [];
-        for (i=0; i<book.length; i++) {
-            var div = book[i];
-            for (j=0; j<div.group.length; j++) {
-                bookUnfolded.push({"title": div.title,
-                                   "group": div.group[j],
-                                   "occurence": j,
-                                   "ref": div.ref,
-                                   "book": div.book
-                                  });
-            }
-        }
-        datasetUnfolded.push(bookUnfolded);
-    }
-
-    // Drawing actual lines using unfolded dataset
-    for (var index=0; index<datasetUnfolded.length; index++) {
-        // as number of unfold items is higher than number of boxes, 
-        // counter has to be rewind for extra occurrences
-        var dataIndex = -1;
-        pathGroups[index]
-            .selectAll("path.i" + index)
-            .data(datasetUnfolded[index])
-            .enter()
-            .append("path")
-            .attr("translate", 0)
-            .attr("d", function (d, i) {
-                if (d.occurence < 1) {dataIndex++;}
-                var lineCoordinates = lineFunction(getPathCoordinates(groupCoordinates, index, d, dataIndex))
-                return lineCoordinates;
-            })
-            .attr("class", function (d) {
-                var classes = [];
-                // // Related boxes and paths belong to the same group;
-                // // for highlighting purposes
-                classes.push("grp-" + d.group);
-                var nc = getNextCoordinates(groupCoordinates, d.group, index);
-                // link-* for keeping track of paths ending on
-                // and starting on a certain boxes
-                classes.push("link-" + index);
-                if (nc) classes.push("link-" + nc["x"]);
-                return classes.join(" ");
-            })
-            .attr("endpointIndex", function(d) {
-                // x index of a box to which the path is pointing to
-                // TODO: Multiple lines; group[0] currently fixed
-                nc = getNextCoordinates(groupCoordinates, d.group, index);
-                return (nc) ? nc["x"] : index;
-            })
-            .style("stroke", colorLightBrown)
-            .attr("fill", "none");
-    }
-
-
-    // var paths = d3.selectAll("path.grp-2")[0];
-    // var path = d3.select(paths[0]);
-    // // path.attr("dupa", 1);
-    // path.attr("transform", "skewY(2)");
-
 }
