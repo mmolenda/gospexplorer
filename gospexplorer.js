@@ -61,10 +61,6 @@ function main(dataset) {
         };
     };
 
-    function moveBook(grp, eventOffset, offset) {
-        d3.select("g#" + grp).attr("transform", "translate(" + 0 + "," + (eventOffset + offset) + ")");
-    }
-
     //Create SVG element
     var svg = d3.select("#leftpane")
         .append("svg")
@@ -86,7 +82,7 @@ function main(dataset) {
         var grp = d3.select(g).attr('id')
 
         // Only allow vertical movement
-        moveBook(grp, d3.event.dy, translate[1]);
+        d3.select("g#" + grp).attr("transform", "translate(" + 0 + "," + (d3.event.dy + translate[1]) + ")");
         d3.event.sourceEvent.stopPropagation();
     });
 
@@ -136,21 +132,7 @@ function main(dataset) {
             .style("stroke", colorLightBrown)
             .on("mouseover", boxMouseOver)
             .on("mouseout", boxMouseOut)
-            .on("click", function(d, i) {
-                // get the offset of selected book (if any) - it will be added to other books
-                // so everything will be correctly adjusted even if clicked book was moved
-                var translateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
-                // adjust other books to clicked one by group
-                for (var book=0; book<dataset.length; book++) {
-                    var bookGrp = d3.select("g#grp-" + book);
-                    var index = groupCoordinates[d.group][book];
-                    // do not touch current book and books that don't contain the group
-                    if (d.book == book || index == null) { continue; }
-                    bookGrp.attr("transform", "translate(0,0)");
-                    var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + translateY;
-                    bookGrp.attr("transform", "translate(0," + diff + ")");
-                }
-            }); 
+            .on("click", adjustOtherBooks);
     }
 
     // Adding text to the boxes
@@ -174,7 +156,8 @@ function main(dataset) {
             .attr("font-size", "11px")
             .attr("fill", colorMediumBrown)
             .on("mouseover", boxMouseOver)
-            .on("mouseout", boxMouseOut); 
+            .on("mouseout", boxMouseOut)
+            .on("click", adjustOtherBooks);
     }
 
     function boxMouseOver(d, i) {
@@ -189,6 +172,22 @@ function main(dataset) {
         for(i=0; i<d.group.length; i++) {
             d3.selectAll(".grp-" + d.group[i]).style("stroke", colorLightBrown);
             d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 1);
+        }
+    }
+
+    function adjustOtherBooks(d, i) {
+        // get the offset of selected book (if any) - it will be added to other books
+        // so everything will be correctly adjusted even if clicked book was moved
+        var translateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
+        // adjust other books to clicked one by group
+        for (var book=0; book<dataset.length; book++) {
+            var bookGrp = d3.select("g#grp-" + book);
+            var index = groupCoordinates[d.group][book];
+            // do not touch current book and books that don't contain the group
+            if (d.book == book || index == null) { continue; }
+            bookGrp.attr("transform", "translate(0,0)");
+            var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + translateY;
+            bookGrp.attr("transform", "translate(0," + diff + ")");
         }
     }
 }
