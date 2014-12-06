@@ -129,7 +129,6 @@ function main(dataset) {
                 }
                 return (d.group) ? frequencyColors[Math.max.apply(Math, groupCounts)] : colorWhite;
             })
-            .style("stroke", colorLightBrown)
             .on("mouseover", boxMouseOver)
             .on("mouseout", boxMouseOut)
             .on("click", adjustOtherBooks);
@@ -161,21 +160,34 @@ function main(dataset) {
     }
 
     function boxMouseOver(d, i) {
-        for(i=0; i<d.group.length; i++) {
-            d3.selectAll(".grp-" + d.group[i]).style("stroke", colorDarkBrown);
-            d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 2);
-        }
+        highlightGroup(d.group);
     }
 
     function boxMouseOut(d, i) {
-        var classes = [];
-        for(i=0; i<d.group.length; i++) {
-            d3.selectAll(".grp-" + d.group[i]).style("stroke", colorLightBrown);
-            d3.selectAll(".grp-" + d.group[i]).style("stroke-width", 1);
+        unhighlightGroup(d.group);
+    }
+
+    function highlightGroup(group) {
+        for(i=0; i<group.length; i++) {
+            d3.selectAll(".grp-" + group[i]).classed("highlighted", true);
+        }
+    }
+
+    function unhighlightGroup(group) {
+        for(i=0; i<group.length; i++) {
+            d3.selectAll(".grp-" + group[i]).classed("highlighted", false);
+        }
+    }
+
+    function selectGroup(group) {
+        d3.selectAll("rect").classed("selected", false);
+        for(i=0; i<group.length; i++) {
+            d3.selectAll(".grp-" + group[i]).classed("selected", true);
         }
     }
 
     function adjustOtherBooks(d, i) {
+        selectGroup(d.group);
         // get the offset of selected book (if any) - it will be added to other books
         // so everything will be correctly adjusted even if clicked book was moved
         var translateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];

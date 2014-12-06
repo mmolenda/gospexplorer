@@ -18,3 +18,17 @@
     overflow: hidden;
     width: auto;
 }
+
+rect {
+    stroke: #FFE5C9;  /*colorLightBrown*/
+}
+
+rect.highlighted {
+    stroke: #5E2100; /*colorDarkBrown*/
+    stroke-width: 2px;
+}
+
+rect.selected {
+    stroke: #5E2100; /*colorDarkBrown*/
+    stroke-width: 3px;
+}
