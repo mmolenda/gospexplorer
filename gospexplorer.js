@@ -137,16 +137,18 @@ function main(dataset) {
             .on("mouseover", boxMouseOver)
             .on("mouseout", boxMouseOut)
             .on("click", function(d, i) {
+                // get the offset of selected book (if any) - it will be added to other books
+                // so everything will be correctly adjusted even if clicked book was moved
+                var translateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
                 // adjust other books to clicked one by group
                 for (var book=0; book<dataset.length; book++) {
-                    // TODO: prevent books from hiding above the screen
-                    // TODO: change position counting so the clicked book doesn't move at all
-                    d3.select("g#grp-" + book).attr("transform", "translate(0,0)");
+                    var bookGrp = d3.select("g#grp-" + book);
                     var index = groupCoordinates[d.group][book];
                     // do not touch current book and books that don't contain the group
                     if (d.book == book || index == null) { continue; }
-                    var diff = (i - index) * (barHeight + barPaddingHorizontal);
-                    d3.select("g#grp-" + book).attr("transform", "translate(0," + diff + ")");
+                    bookGrp.attr("transform", "translate(0,0)");
+                    var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + translateY;
+                    bookGrp.attr("transform", "translate(0," + diff + ")");
                 }
             }); 
     }
