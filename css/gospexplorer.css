@@ -24,7 +24,7 @@ rect {
 }
 
 rect.highlighted {
-    stroke: #5E2100; /*colorDarkBrown*/
+    stroke: rgb(201, 115, 68); /*colorDarkBrown*/
     stroke-width: 2px;
 }
 
