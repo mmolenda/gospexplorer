@@ -25,7 +25,7 @@ var frequencyColors = {
     4: "#F5DA81",
 }
 
-d3.json("/data2.json", function(dataset) {
+d3.json("data/data.json", function(dataset) {
     main(dataset);
 });
 
@@ -180,14 +180,47 @@ function main(dataset) {
     }
 
     function selectGroup(group) {
-        d3.selectAll("rect").classed("selected", false);
+        d3.selectAll("rect.selected").classed("selected", false);
         for(i=0; i<group.length; i++) {
             d3.selectAll(".grp-" + group[i]).classed("selected", true);
         }
     }
 
+    function fetchContents(group) {
+        var refs = [];
+        var titles = [];
+        var refsString;
+        for(i=0; i<group.length; i++) {
+            var rects = d3.selectAll("rect.grp-" + group[i]);
+            for(j=0; j<rects[0].length; j++) {
+                refs.push(d3.select(rects[0][j]).data()[0].ref);
+                titles.push(d3.select(rects[0][j]).data()[0].title);
+            }
+        }
+
+        // Send AJAX request
+        refsString = refs.join(":");
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET","data/" + refsString + ".json", false);
+        xmlhttp.send();
+        var obj = JSON.parse(xmlhttp.responseText);
+        
+        // Prepare right pane HTML
+        var rightPaneContents = "";
+        for(i=0; i<obj.length; i++) {
+            rightPaneContents += "<h1>";
+            rightPaneContents += titles[i] + " (" + obj[i]["ref"] + ")";
+            rightPaneContents += "</h1>";
+            rightPaneContents += "<p>";
+            rightPaneContents += obj[i]["content"];
+            rightPaneContents += "</p>";
+        }
+        document.getElementById("rightpane").innerHTML = rightPaneContents;
+    }
+
     function adjustOtherBooks(d, i) {
         selectGroup(d.group);
+        fetchContents(d.group);
         // get the offset of selected book (if any) - it will be added to other books
         // so everything will be correctly adjusted even if clicked book was moved
         var translateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
