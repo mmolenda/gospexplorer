@@ -17,8 +17,20 @@
     top: 0;
     margin-left: 1000px;
     background: #F5ECCE;
+}
+
+#paragraphs {
     color: rgb(94, 33, 0);
+    padding-bottom: 60px;
+}
+
+#paragraphs p {
     font-size: 16px;
+}
+
+#paragraphs h1 {
+    color: rgb(94, 33, 0);
+    font-size: 16px;    
 }
 
 rect {

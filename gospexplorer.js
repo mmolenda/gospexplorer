@@ -226,15 +226,17 @@ function main(dataset) {
         fetchContents(d.group);
         // get the offset of selected book (if any) - it will be added to other books
         // so everything will be correctly adjusted even if clicked book was moved
-        var translateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
+        var selectedTranslateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
         // adjust other books to clicked one by group
         for (var book=0; book<dataset.length; book++) {
             var bookGrp = d3.select("g#grp-" + book);
+            // var bookTranslateY = d3.transform(bookGrp.attr("transform"))["translate"][1];
+            // console.log(bookTranslateY);
             var index = groupCoordinates[d.group][book];
             // do not touch current book and books that don't contain the group
             if (d.book == book || index == null) { continue; }
             bookGrp.attr("transform", "translate(0,0)");
-            var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + translateY;
+            var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + selectedTranslateY;
             bookGrp.transition().attr("transform", "translate(0," + diff + ")");
         }
     }
