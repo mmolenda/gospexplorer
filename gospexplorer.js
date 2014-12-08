@@ -25,7 +25,10 @@ var frequencyColors = {
     4: "#F5DA81",
 }
 
+var defaultContent = "<p>PATER NOSTER, qui es in caelis, sanctificetur nomen tuum. Adveniat regnum tuum. Fiat voluntas tua, sicut in caelo et in terra. Panem nostrum quotidianum da nobis hodie, et dimitte nobis debita nostra sicut et nos dimittimus debitoribus nostris. Et ne nos inducas in tentationem, sed libera nos a malo. Amen.</p>";
+
 d3.json("data/data.json", function(dataset) {
+    document.getElementById("paragraphs").innerHTML = defaultContent;
     main(dataset);
 });
 
@@ -199,9 +202,9 @@ function main(dataset) {
         }
 
         // Send AJAX request
-        refsString = refs.join(":");
+        refsString = refs.join(";");
         var xmlhttp = new XMLHttpRequest();
-        xmlhttp.open("GET","data/" + refsString + ".json", false);
+        xmlhttp.open("GET", "paragraph.php?q=" + refsString, false);
         xmlhttp.send();
         var obj = JSON.parse(xmlhttp.responseText);
         
@@ -215,7 +218,7 @@ function main(dataset) {
             rightPaneContents += obj[i]["content"];
             rightPaneContents += "</p>";
         }
-        document.getElementById("rightpane").innerHTML = rightPaneContents;
+        document.getElementById("paragraphs").innerHTML = rightPaneContents;
     }
 
     function adjustOtherBooks(d, i) {
@@ -232,7 +235,12 @@ function main(dataset) {
             if (d.book == book || index == null) { continue; }
             bookGrp.attr("transform", "translate(0,0)");
             var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + translateY;
-            bookGrp.attr("transform", "translate(0," + diff + ")");
+            bookGrp.transition().attr("transform", "translate(0," + diff + ")");
         }
     }
+
+    // function resetAll() {
+        // document.getElementById("paragraphs").innerHTML = defaultContent;
+        // d3.bookGrp.attr("transform", "translate(0,0)");
+    // }
 }
