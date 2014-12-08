@@ -1,22 +1,36 @@
 
+
+#leftpane {
+    float: left;
+    overflow: hidden;
+    width: 1000px;
+}
+
 #rightpane {
     float: right;
     height: 100%;
     overflow-x: hidden;
     overflow-y: scroll;
-    padding: 11px;
+    padding: 18px;
     position: fixed;
     right: 0;
     top: 0;
-    width: 350px;
+    margin-left: 1000px;
     background: #F5ECCE;
-    color: rgb(94, 33, 0);
 }
 
-#leftpane {
-    float: none;
-    overflow: hidden;
-    width: auto;
+#paragraphs {
+    color: rgb(94, 33, 0);
+    padding-bottom: 60px;
+}
+
+#paragraphs p {
+    font-size: 16px;
+}
+
+#paragraphs h1 {
+    color: rgb(94, 33, 0);
+    font-size: 16px;    
 }
 
 rect {

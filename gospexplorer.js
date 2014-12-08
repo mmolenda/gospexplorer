@@ -25,7 +25,10 @@ var frequencyColors = {
     4: "#F5DA81",
 }
 
-d3.json("/data2.json", function(dataset) {
+var defaultContent = "<p>PATER NOSTER, qui es in caelis, sanctificetur nomen tuum. Adveniat regnum tuum. Fiat voluntas tua, sicut in caelo et in terra. Panem nostrum quotidianum da nobis hodie, et dimitte nobis debita nostra sicut et nos dimittimus debitoribus nostris. Et ne nos inducas in tentationem, sed libera nos a malo. Amen.</p>";
+
+d3.json("data/data.json", function(dataset) {
+    document.getElementById("paragraphs").innerHTML = defaultContent;
     main(dataset);
 });
 
@@ -180,26 +183,66 @@ function main(dataset) {
     }
 
     function selectGroup(group) {
-        d3.selectAll("rect").classed("selected", false);
+        d3.selectAll("rect.selected").classed("selected", false);
         for(i=0; i<group.length; i++) {
             d3.selectAll(".grp-" + group[i]).classed("selected", true);
         }
     }
 
+    function fetchContents(group) {
+        var refs = [];
+        var titles = [];
+        var refsString;
+        for(i=0; i<group.length; i++) {
+            var rects = d3.selectAll("rect.grp-" + group[i]);
+            for(j=0; j<rects[0].length; j++) {
+                refs.push(d3.select(rects[0][j]).data()[0].ref);
+                titles.push(d3.select(rects[0][j]).data()[0].title);
+            }
+        }
+
+        // Send AJAX request
+        refsString = refs.join(";");
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET", "paragraph.php?q=" + refsString, false);
+        xmlhttp.send();
+        var obj = JSON.parse(xmlhttp.responseText);
+        
+        // Prepare right pane HTML
+        var rightPaneContents = "";
+        for(i=0; i<obj.length; i++) {
+            rightPaneContents += "<h1>";
+            rightPaneContents += titles[i] + " (" + obj[i]["ref"] + ")";
+            rightPaneContents += "</h1>";
+            rightPaneContents += "<p>";
+            rightPaneContents += obj[i]["content"];
+            rightPaneContents += "</p>";
+        }
+        document.getElementById("paragraphs").innerHTML = rightPaneContents;
+    }
+
     function adjustOtherBooks(d, i) {
         selectGroup(d.group);
+        fetchContents(d.group);
         // get the offset of selected book (if any) - it will be added to other books
         // so everything will be correctly adjusted even if clicked book was moved
-        var translateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
+        var selectedTranslateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
         // adjust other books to clicked one by group
         for (var book=0; book<dataset.length; book++) {
             var bookGrp = d3.select("g#grp-" + book);
+            // var bookTranslateY = d3.transform(bookGrp.attr("transform"))["translate"][1];
+            // console.log(bookTranslateY);
             var index = groupCoordinates[d.group][book];
             // do not touch current book and books that don't contain the group
             if (d.book == book || index == null) { continue; }
             bookGrp.attr("transform", "translate(0,0)");
-            var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + translateY;
-            bookGrp.attr("transform", "translate(0," + diff + ")");
+            var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + selectedTranslateY;
+            bookGrp.transition().attr("transform", "translate(0," + diff + ")");
         }
     }
+
+    // function resetAll() {
+        // document.getElementById("paragraphs").innerHTML = defaultContent;
+        // d3.bookGrp.attr("transform", "translate(0,0)");
+    // }
 }
