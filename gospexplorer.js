@@ -232,9 +232,7 @@ function main(dataset) {
         // adjust other books to clicked one by group
         for (var book=0; book<dataset.length; book++) {
             var bookGrp = d3.select("g#grp-" + book);
-            // var bookTranslateY = d3.transform(bookGrp.attr("transform"))["translate"][1];
-            // console.log(bookTranslateY);
-            var index = groupCoordinates[d.group][book];
+            var index = groupCoordinates[d.group[0]][book];
             // do not touch current book and books that don't contain the group
             if (d.book == book || index == null) { continue; }
             var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + selectedTranslateY;

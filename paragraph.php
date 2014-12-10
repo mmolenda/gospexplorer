@@ -13,16 +13,16 @@ function getRefs($get) {
         if (! preg_match("/^[a-zA-Z]+[0-9]+,[0-9]+-[0-9]+$/", $ref)) {
             return array();
         }
-        array_push($ret, strtolower($ref));
+        $ret[strtolower($ref)] = 1;
     }
-    return $ret;
+    return array_keys($ret);
 }
 
 function fetchContents($dbfile, $refs) {
     $ret = array();
     $db = new SQLite3($dbfile);
     $placeholders = implode(',', array_fill(0, count($refs), '?'));
-    $statement = $db->prepare("SELECT ref, content FROM gospel WHERE ref IN ($placeholders)");
+    $statement = $db->prepare("SELECT ref, content FROM gospel WHERE ref IN ($placeholders) ORDER BY ref DESC");
     for ($i=0; $i<count($refs); $i++) {
         $statement->bindValue($i + 1, $refs[$i]);
     }
@@ -47,7 +47,7 @@ $contents = fetchContents($DBFILE, $refs);
 
 if (count($contents) != count($refs)) {
     header("HTTP/1.0 400 Bad request");
-    echo '{"message": "Invalid query"}';
+    echo '{"message": "Cannot fetch data for all provided refs"}';
     die();
 }
 
