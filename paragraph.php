@@ -1,7 +1,5 @@
 <?php 
 
-# TODO: database sort by book
-
 header('Content-Type: application/json');
 $DBFILE = 'data/gospel.sqlite3';
 
@@ -13,7 +11,7 @@ function getRefs($get) {
         if (! preg_match("/^[a-zA-Z]+[0-9]+,[0-9]+-[0-9]+$/", $ref)) {
             return array();
         }
-        $ret[strtolower($ref)] = 1;
+        $ret[$ref] = 1;
     }
     return array_keys($ret);
 }
@@ -22,18 +20,16 @@ function fetchContents($dbfile, $refs) {
     $ret = array();
     $db = new SQLite3($dbfile);
     $placeholders = implode(',', array_fill(0, count($refs), '?'));
-    $statement = $db->prepare("SELECT ref, content FROM gospel WHERE ref IN ($placeholders) ORDER BY ref DESC");
+    $statement = $db->prepare("SELECT ref, content FROM gospel WHERE ref IN ($placeholders)");
     for ($i=0; $i<count($refs); $i++) {
         $statement->bindValue($i + 1, $refs[$i]);
     }
     $results = $statement->execute();
     while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-        array_push($ret, $row);
+        $ret[$row['ref']] = $row['content'];
     }
     return $ret;
 }
-
-
 
 $refs = getRefs($_GET);
 

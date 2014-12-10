@@ -193,13 +193,14 @@ function main(dataset) {
 
     function fetchContents(group) {
         var refs = [];
-        var titles = [];
+        var titles = {};
         var refsString;
         for(i=0; i<group.length; i++) {
             var rects = d3.selectAll("rect.grp-" + group[i]);
             for(j=0; j<rects[0].length; j++) {
-                refs.push(d3.select(rects[0][j]).data()[0].ref);
-                titles.push(d3.select(rects[0][j]).data()[0].title);
+                var ref = d3.select(rects[0][j]).data()[0].ref;
+                refs.push(ref);
+                titles[ref] = d3.select(rects[0][j]).data()[0].title;
             }
         }
 
@@ -212,12 +213,13 @@ function main(dataset) {
         
         // Prepare right pane HTML
         var rightPaneContents = "";
-        for(i=0; i<obj.length; i++) {
+        for(i=0; i<refs.length; i++) {
+            var ref = refs[i];
             rightPaneContents += "<h1>";
-            rightPaneContents += titles[i] + " (" + obj[i]["ref"] + ")";
+            rightPaneContents += titles[ref] + " (" + ref + ")";
             rightPaneContents += "</h1>";
             rightPaneContents += "<p>";
-            rightPaneContents += obj[i]["content"];
+            rightPaneContents += obj[ref];
             rightPaneContents += "</p>";
         }
         document.getElementById("paragraphs").innerHTML = rightPaneContents;
