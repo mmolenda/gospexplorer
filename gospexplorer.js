@@ -4,7 +4,7 @@
 
 
 var barPaddingHorizontal = 10;
-var barPaddingVertical = 40;
+var barPaddingVertical = 20;
 var barWidth = 200;
 var barHeight = 20;
 var labelOffsetVertical = 10;
@@ -112,6 +112,8 @@ function main(dataset) {
             .attr("y", function (d, i) {
                 return i * (barHeight + barPaddingHorizontal);
             })
+            .attr("rx", 3)
+            .attr("ry", 3)
             .attr("width", barWidth)
             .attr("height", barHeight)
             .attr("group", function(d, i) {return d.group;})
@@ -235,7 +237,6 @@ function main(dataset) {
             var index = groupCoordinates[d.group][book];
             // do not touch current book and books that don't contain the group
             if (d.book == book || index == null) { continue; }
-            bookGrp.attr("transform", "translate(0,0)");
             var diff = ((i - index ) * (barHeight + barPaddingHorizontal)) + selectedTranslateY;
             bookGrp.transition().attr("transform", "translate(0," + diff + ")");
         }

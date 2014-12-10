@@ -3,7 +3,7 @@
 #leftpane {
     float: left;
     overflow: hidden;
-    width: 1000px;
+    width: 920px;
 }
 
 #rightpane {
@@ -15,7 +15,7 @@
     position: fixed;
     right: 0;
     top: 0;
-    margin-left: 1000px;
+    margin-left: 920px;
     background: #F5ECCE;
 }
 
@@ -44,5 +44,9 @@ rect.highlighted {
 
 rect.selected {
     stroke: #5E2100; /*colorDarkBrown*/
-    stroke-width: 3px;
+    stroke-width: 2px;
+}
+
+text {
+    cursor: default;
 }
