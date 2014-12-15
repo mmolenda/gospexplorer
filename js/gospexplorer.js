@@ -9,6 +9,7 @@ var barWidth = 200;
 var barHeight = 20;
 var labelOffsetVertical = 10;
 var labelOffsetHorizontal = 10;
+var colorVeryLightBrown = "#F5ECCE";
 var colorLightBrown = "#FFE5C9";
 var colorMediumBrown = "rgb(201, 115, 68)";
 var colorDarkBrown = "rgb(94, 33, 0)";
@@ -25,7 +26,7 @@ var frequencyColors = {
     4: "#F5DA81",
 }
 
-var defaultContent = "<p>PATER NOSTER, qui es in caelis, sanctificetur nomen tuum. Adveniat regnum tuum. Fiat voluntas tua, sicut in caelo et in terra. Panem nostrum quotidianum da nobis hodie, et dimitte nobis debita nostra sicut et nos dimittimus debitoribus nostris. Et ne nos inducas in tentationem, sed libera nos a malo. Amen.</p>";
+var defaultContent = "<p>KLIKNIJ wybraną historię, aby pokazać jej treść oraz powiązane historie z pozostałych ewangelii.<br /><br />PRZECIĄGNIJ wybraną ewangelię w pionie aby zmienić jej pozycję względem pozostałych.<br /><br />WSZYSTKIE cytaty pochodzą z Biblii Tysiąclecia.<br /><br />AD MAIOREM DEI GLORIAM</p>";
 
 d3.json("data/data.json", function(dataset) {
     document.getElementById("paragraphs").innerHTML = defaultContent;
@@ -136,7 +137,7 @@ function main(dataset) {
             })
             .on("mouseover", boxMouseOver)
             .on("mouseout", boxMouseOut)
-            .on("click", adjustOtherBooks);
+            .on("click", boxMouseClick);
     }
 
     // Adding text to the boxes
@@ -161,37 +162,48 @@ function main(dataset) {
             .attr("fill", colorMediumBrown)
             .on("mouseover", boxMouseOver)
             .on("mouseout", boxMouseOut)
-            .on("click", adjustOtherBooks);
+            .on("click", boxMouseClick);
     }
 
     function boxMouseOver(d, i) {
         highlightGroup(d.group);
     }
 
-    function boxMouseOut(d, i) {
+    function boxMouseOut(d, i) {  
         unhighlightGroup(d.group);
     }
 
     function highlightGroup(group) {
         for(i=0; i<group.length; i++) {
-            d3.selectAll(".grp-" + group[i]).classed("highlighted", true);
+            d3.selectAll(".grp-" + group[i] + ":not(.selected)")
+            .style("stroke-width", 2)
+            .transition().duration(150).style("stroke", colorMediumBrown);
         }
     }
 
     function unhighlightGroup(group) {
         for(i=0; i<group.length; i++) {
-            d3.selectAll(".grp-" + group[i]).classed("highlighted", false);
+            d3.selectAll(".grp-" + group[i] + ":not(.selected)")
+            .style("stroke-width", 1)
+            .transition().duration(150).style("stroke", colorLightBrown);
         }
     }
 
     function selectGroup(group) {
-        d3.selectAll("rect.selected").classed("selected", false);
+        // remove selection style from currently selected elements
+        d3.selectAll("rect.selected")
+        .classed("selected", false)
+        .style("stroke", colorLightBrown)
+        .style("stroke-width", 1);
+        // select clicked
         for(i=0; i<group.length; i++) {
-            d3.selectAll(".grp-" + group[i]).classed("selected", true);
+            d3.selectAll(".grp-" + group[i]).classed("selected", true)
+            .style("stroke-width", 2)
+            .transition().duration(500).style("stroke", colorDarkBrown);
         }
     }
 
-    function fetchContents(group) {
+    function fetchAndInjectStories(group) {
         var refs = [];
         var titles = {};
         var refsString;
@@ -205,6 +217,7 @@ function main(dataset) {
         }
 
         // Send AJAX request
+        // TODO: use async call and callback functions
         refsString = refs.join(";");
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.open("GET", "paragraph.php?q=" + refsString, false);
@@ -215,19 +228,28 @@ function main(dataset) {
         var rightPaneContents = "";
         for(i=0; i<refs.length; i++) {
             var ref = refs[i];
+            rightPaneContents += "<div class=\"paragraph\">";
             rightPaneContents += "<h1>";
-            rightPaneContents += titles[ref] + " (" + ref + ")";
+            rightPaneContents += titles[ref].toUpperCase() + " (" + ref + ")";
             rightPaneContents += "</h1>";
             rightPaneContents += "<p>";
             rightPaneContents += obj[ref];
             rightPaneContents += "</p>";
+            rightPaneContents += "</div>";
         }
-        document.getElementById("paragraphs").innerHTML = rightPaneContents;
+        // reset scroll in paragraphs pane
+        var paragraphs = document.getElementById('paragraphs');
+        paragraphs.scrollTop = 0;
+        // inject fetched data
+        d3.select(paragraphs).html(rightPaneContents)
+        .style("color", colorVeryLightBrown)
+        .transition().duration("500").style("color", colorDarkBrown);
+
     }
 
-    function adjustOtherBooks(d, i) {
+    function boxMouseClick(d, i) {
         selectGroup(d.group);
-        fetchContents(d.group);
+        fetchAndInjectStories(d.group);
         // get the offset of selected book (if any) - it will be added to other books
         // so everything will be correctly adjusted even if clicked book was moved
         var selectedTranslateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
@@ -241,7 +263,6 @@ function main(dataset) {
             bookGrp.transition().attr("transform", "translate(0," + diff + ")");
         }
     }
-
 
     function getNextCoordinates(groupCoordinates, group, index) {
         var ret = null;
@@ -258,7 +279,7 @@ function main(dataset) {
     }
 
     function truncate(string){
-        var length = 30;
+        var length = 28;
        if (string.length > length)
           return string.substring(0, length) + '...';
        else

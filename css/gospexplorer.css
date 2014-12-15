@@ -9,9 +9,6 @@
 #rightpane {
     float: right;
     height: 100%;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    padding: 18px;
     position: fixed;
     right: 0;
     top: 0;
@@ -19,17 +16,25 @@
     background: #F5ECCE;
 }
 
+#controls {
+}
+
 #paragraphs {
-    color: rgb(94, 33, 0);
-    padding-bottom: 60px;
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+    padding: 18px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /*color: rgb(94, 33, 0);*/
+    height: 90%;
 }
 
 #paragraphs p {
     font-size: 16px;
+    text-align: justify;
 }
 
 #paragraphs h1 {
-    color: rgb(94, 33, 0);
+    font-weight: bold;
     font-size: 16px;    
 }
 
@@ -37,21 +42,7 @@ rect {
     stroke: #FFE5C9;  /*colorLightBrown*/
 }
 
-rect.highlighted {
-    stroke: rgb(201, 115, 68); /*colorDarkBrown*/
-    stroke-width: 2px;
-}
-
-rect.selected {
-    stroke: #5E2100; /*colorDarkBrown*/
-    stroke-width: 2px;
-}
-
 text {
+    font-family: Verdana, Geneva, sans-serif;
     cursor: default;
 }
-
-/*color in boxes 
-#f98012
-https://moodle.org/mod/forum/discuss.php?d=112524
-*/
