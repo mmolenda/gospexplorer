@@ -9,24 +9,36 @@ var barWidth = 200;
 var barHeight = 20;
 var labelOffsetVertical = 10;
 var labelOffsetHorizontal = 10;
-var colorVeryLightBrown = "#F5ECCE";
-var colorLightBrown = "#FFE5C9";
-var colorMediumBrown = "rgb(201, 115, 68)";
-var colorDarkBrown = "rgb(94, 33, 0)";
-var colorWhite = "#FFF";
+
+var colorBlue1 = "#f7f8fa";
+var colorBlue2 = "#e3e4e6";
+var colorBlue3 = "#cfd0d1";
+var colorBlue4 = "#b8b9ba";
+var colorBlue5 = "#a4a5a6";
+var colorBlue6 = "#909191";
+var colorBlue7 = "#797a7a";
+var colorBlue8 = "#5b5b5c";
+var colorRed2 = "#b61a01";
 
 //Width and height
 var w = 1200;
 var h = (barHeight + barPaddingHorizontal) * 200;
 
 var frequencyColors = {
-    1: "#FFF",
-    2: "#F5ECCE",
-    3: "#F3E2A9",
-    4: "#F5DA81",
+    1: colorBlue1,
+    2: colorBlue2,
+    3: colorBlue3,
+    4: colorBlue4
 }
 
-var defaultContent = "<p>KLIKNIJ wybraną historię, aby pokazać jej treść oraz powiązane historie z pozostałych ewangelii.<br /><br />PRZECIĄGNIJ wybraną ewangelię w pionie aby zmienić jej pozycję względem pozostałych.<br /><br />WSZYSTKIE cytaty pochodzą z Biblii Tysiąclecia.<br /><br />AD MAIOREM DEI GLORIAM</p>";
+var defaultContent = "" + 
+"<p>" + 
+"<span style=\"color: #b61a01\">INTENSYWNOŚĆ</span> koloru jest proporcjonalna do liczby wystąpień danego fragmentu w ewangeliach - im ciemniejszy kolor w tym większej liczbie ewangelii dany fragment występuje<br /><br />" +
+"<span style=\"color: #b61a01\">KLIKNIJ</span> wybrany fragment, aby pokazać jego treść oraz powiązane fragmenty z pozostałych ewangelii<br /><br />" +
+"<span style=\"color: #b61a01\">PRZECIĄGNIJ</span> wybraną ewangelię w pionie aby zmienić jej pozycję względem pozostałych<br /><br />" +
+"<span style=\"color: #b61a01\">WSZYSTKIE</span> cytaty pochodzą z Biblii Tysiąclecia<br /><br />" +
+"<span style=\"color: #b61a01\">AD MAIOREM DEI GLORIAM</span>" +
+"</p>";
 
 d3.json("data/data.json", function(dataset) {
     document.getElementById("paragraphs").innerHTML = defaultContent;
@@ -159,7 +171,7 @@ function main(dataset) {
             })
             .attr("font-family", "sans-serif")
             .attr("font-size", "11px")
-            .attr("fill", colorMediumBrown)
+            .attr("fill", colorBlue8)
             .on("mouseover", boxMouseOver)
             .on("mouseout", boxMouseOut)
             .on("click", boxMouseClick);
@@ -177,7 +189,7 @@ function main(dataset) {
         for(i=0; i<group.length; i++) {
             d3.selectAll(".grp-" + group[i] + ":not(.selected)")
             .style("stroke-width", 2)
-            .transition().duration(150).style("stroke", colorMediumBrown);
+            .transition().duration(150).style("stroke", colorBlue6);
         }
     }
 
@@ -185,7 +197,7 @@ function main(dataset) {
         for(i=0; i<group.length; i++) {
             d3.selectAll(".grp-" + group[i] + ":not(.selected)")
             .style("stroke-width", 1)
-            .transition().duration(150).style("stroke", colorLightBrown);
+            .transition().duration(150).style("stroke", colorBlue2);
         }
     }
 
@@ -193,13 +205,13 @@ function main(dataset) {
         // remove selection style from currently selected elements
         d3.selectAll("rect.selected")
         .classed("selected", false)
-        .style("stroke", colorLightBrown)
+        .style("stroke", colorBlue2)
         .style("stroke-width", 1);
         // select clicked
         for(i=0; i<group.length; i++) {
             d3.selectAll(".grp-" + group[i]).classed("selected", true)
             .style("stroke-width", 2)
-            .transition().duration(500).style("stroke", colorDarkBrown);
+            .transition().duration(500).style("stroke", colorRed2);
         }
     }
 
@@ -242,8 +254,8 @@ function main(dataset) {
         paragraphs.scrollTop = 0;
         // inject fetched data
         d3.select(paragraphs).html(rightPaneContents)
-        .style("color", colorVeryLightBrown)
-        .transition().duration("500").style("color", colorDarkBrown);
+        .style("color", colorBlue1)
+        .transition().duration("500").style("color", colorBlue8);
 
     }
 

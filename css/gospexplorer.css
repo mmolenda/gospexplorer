@@ -7,8 +7,12 @@
     left: 0;
     right: 0;
     z-index: 1;
-    background: #F5ECCE;
-    border-bottom: 1px #FFE5C9 solid;
+    padding: 0.5% 0 0 0.5%;
+    background: #42425c;
+    color: #fff;
+    border-bottom: 2px solid #b61a01;  /* colorRed2 */
+    font-family: Verdana, Geneva, sans-serif;
+    font-weight: bold;
 }
 
 #container {
@@ -19,7 +23,7 @@
 #leftpane {
     width: 920px;
     float: left;
-    padding-top: 40px;
+    padding-top: 42px;
     overflow: hidden;
 }
 
@@ -31,9 +35,10 @@
     left: 50%;
     top: 0;
     margin-left: 260px;
-    padding: 28px 0;
+    padding: 30px 0;
     z-index: 0;
-    background: #F5ECCE;
+    background: #f7f8fa; /* colorBlue1 */
+    border-right: 1px solid #cfd0d1;
 }
 
 #controls {
@@ -54,11 +59,12 @@
 
 #paragraphs h1 {
     font-weight: bold;
-    font-size: 16px;    
+    font-size: 16px;
+    color: #b61a01;  /* colorRed2 */
 }
 
 rect {
-    stroke: #FFE5C9;  /*colorLightBrown*/
+    stroke: #e3e4e6;  /* colorBlue2 */
 }
 
 text {
