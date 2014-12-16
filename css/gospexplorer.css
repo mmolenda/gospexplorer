@@ -1,18 +1,38 @@
 
+#header {
+    width: 100%;
+    height: 28px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    background: #F5ECCE;
+    border-bottom: 1px #FFE5C9 solid;
+}
+
+#container {
+    width: 1280px;
+    margin: auto;
+}
 
 #leftpane {
-    float: left;
-    overflow: hidden;
     width: 920px;
+    float: left;
+    padding-top: 40px;
+    overflow: hidden;
 }
 
 #rightpane {
-    float: right;
     height: 100%;
+    width: 360px;
     position: fixed;
-    right: 0;
+    float: right;
+    left: 50%;
     top: 0;
-    margin-left: 920px;
+    margin-left: 260px;
+    padding: 28px 0;
+    z-index: 0;
     background: #F5ECCE;
 }
 
@@ -21,10 +41,9 @@
 
 #paragraphs {
     font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
-    padding: 18px;
+    padding: 0 18px;
     overflow-x: hidden;
     overflow-y: auto;
-    /*color: rgb(94, 33, 0);*/
     height: 90%;
 }
 
