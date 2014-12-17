@@ -316,6 +316,7 @@ function main(datasetTitles, datasetContents) {
     d3.select("a#title").on("click", function() {
         // Reset everything
         d3.event.preventDefault();
+        window.scrollTo(0, 0);
         unselectSelected();
         injectToRightpane("#paragraphs", intro);
         d3.selectAll("g").transition().duration(125).attr("transform", "translate(0,0)");
