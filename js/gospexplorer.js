@@ -4,6 +4,9 @@
 
 var __version__ = null
 
+//
+// Constants
+//
 var barPaddingHorizontal = 10;
 var barPaddingVertical = 20;
 var barWidth = 200;
@@ -21,7 +24,7 @@ var colorBlue7 = "#797a7a";
 var colorBlue8 = "#5b5b5c";
 var colorRed2 = "#b61a01";
 
-//Width and height
+// Width and height
 var w = 920;
 var h = (barHeight + barPaddingHorizontal) * 200;
 
@@ -43,14 +46,113 @@ var intro = "" +
 "</p>";
 
 
-function injectToRightpane(selector, html) {
+//
+// Helper functions
+//
+function injectHtml(selector, html) {
     d3.select(selector).html(html)
     .style("color", colorBlue1)
     .transition().duration("500").style("color", colorBlue8);
 }
 
-// Setting up intro text
-injectToRightpane("#paragraphs", intro);
+function boxMouseOver(d, i) {
+    highlightGroup(d.group);
+}
+
+function boxMouseOut(d, i) {  
+    unhighlightGroup(d.group);
+}
+
+function highlightGroup(group) {
+    for(i=0; i<group.length; i++) {
+        d3.selectAll(".grp-" + group[i] + ":not(.selected)")
+        .style("stroke-width", 2)
+        .transition().duration(150).style("stroke", colorBlue6);
+    }
+}
+
+function unhighlightGroup(group) {
+    for(i=0; i<group.length; i++) {
+        d3.selectAll(".grp-" + group[i] + ":not(.selected)")
+        .style("stroke-width", 1)
+        .transition().duration(150).style("stroke", colorBlue2);
+    }
+}
+
+function unselectSelected() {
+    d3.selectAll("rect.selected")
+    .classed("selected", false)
+    .style("stroke", colorBlue2)
+    .style("stroke-width", 1);
+}
+
+function selectGroup(group) {
+    unselectSelected()
+    for(i=0; i<group.length; i++) {
+        d3.selectAll(".grp-" + group[i]).classed("selected", true)
+        .style("stroke-width", 2)
+        .transition().duration(500).style("stroke", colorRed2);
+    }
+}
+
+function getNextCoordinates(groupCoordinates, group, index) {
+    var ret = null;
+    if (index > 2) {
+        return ret;
+    }
+    var nextCoordinates = groupCoordinates[group];
+    for (var x=index+1; x<nextCoordinates.length; x++) {
+        if (nextCoordinates[x] != null) {
+            return {"x": x, "y": nextCoordinates[x]};
+        }
+    }
+    return ret;
+}
+
+function truncate(string){
+    var length = 28;
+   if (string.length > length)
+      return string.substring(0, length) + '...';
+   else
+      return string;
+};
+
+function showContents(datasetContents, group) {
+    var refs = [];
+    var titles = {};
+    for(i=0; i<group.length; i++) {
+        var rects = d3.selectAll("rect.grp-" + group[i]);
+        for(j=0; j<rects[0].length; j++) {
+            var ref = d3.select(rects[0][j]).data()[0].ref;
+            refs.push(ref);
+            titles[ref] = d3.select(rects[0][j]).data()[0].title;
+        }
+    }
+
+    // Prepare right pane HTML
+    var rightPaneContents = "";
+    for(i=0; i<refs.length; i++) {
+        var ref = refs[i];
+        rightPaneContents += "<div class=\"paragraph\">";
+        rightPaneContents += "<h1>";
+        rightPaneContents += titles[ref].toUpperCase() + " (" + ref + ")";
+        rightPaneContents += "</h1>";
+        rightPaneContents += "<p>";
+        rightPaneContents += datasetContents[ref];
+        rightPaneContents += "</p>";
+        rightPaneContents += "</div>";
+    }
+    // reset scroll in paragraphs pane
+    var paragraphs = document.getElementById('paragraphs');
+    paragraphs.scrollTop = 0;
+    // inject fetched data
+    injectHtml(paragraphs, rightPaneContents);
+}
+
+//
+// Setting up actual stuff
+//
+injectHtml("#paragraphs", intro);
 d3.select("#leftpane").html("Loading...");
 
 // Loading the data and running main function in case of success
@@ -65,12 +167,12 @@ d3.json("data/bt_titles.json", function(error, datasetTitles) {
             return;
         }
         d3.select("#leftpane").html("");
-        main(datasetTitles, datasetContents);
+        visualizeData(datasetTitles, datasetContents);
     })
 });
 
 
-function main(datasetTitles, datasetContents) {
+function visualizeData(datasetTitles, datasetContents) {
     // key - group ID
     // value - list of y indexes for each book 
     // 1: [0, null, null, null]
@@ -174,7 +276,7 @@ function main(datasetTitles, datasetContents) {
             })
             .on("mouseover", boxMouseOver)
             .on("mouseout", boxMouseOut)
-            .on("click", boxMouseClick);
+            .on("click", boxMouseClick, "a", "b");
     }
 
     // Adding text to the boxes
@@ -202,81 +304,11 @@ function main(datasetTitles, datasetContents) {
             .on("click", boxMouseClick);
     }
 
-    function boxMouseOver(d, i) {
-        highlightGroup(d.group);
-    }
-
-    function boxMouseOut(d, i) {  
-        unhighlightGroup(d.group);
-    }
-
-    function highlightGroup(group) {
-        for(i=0; i<group.length; i++) {
-            d3.selectAll(".grp-" + group[i] + ":not(.selected)")
-            .style("stroke-width", 2)
-            .transition().duration(150).style("stroke", colorBlue6);
-        }
-    }
-
-    function unhighlightGroup(group) {
-        for(i=0; i<group.length; i++) {
-            d3.selectAll(".grp-" + group[i] + ":not(.selected)")
-            .style("stroke-width", 1)
-            .transition().duration(150).style("stroke", colorBlue2);
-        }
-    }
-
-    function unselectSelected() {
-        d3.selectAll("rect.selected")
-        .classed("selected", false)
-        .style("stroke", colorBlue2)
-        .style("stroke-width", 1);
-    }
-
-    function selectGroup(group) {
-        unselectSelected()
-        for(i=0; i<group.length; i++) {
-            d3.selectAll(".grp-" + group[i]).classed("selected", true)
-            .style("stroke-width", 2)
-            .transition().duration(500).style("stroke", colorRed2);
-        }
-    }
-
-    function fetchAndInjectStories(group) {
-        var refs = [];
-        var titles = {};
-        for(i=0; i<group.length; i++) {
-            var rects = d3.selectAll("rect.grp-" + group[i]);
-            for(j=0; j<rects[0].length; j++) {
-                var ref = d3.select(rects[0][j]).data()[0].ref;
-                refs.push(ref);
-                titles[ref] = d3.select(rects[0][j]).data()[0].title;
-            }
-        }
-
-        // Prepare right pane HTML
-        var rightPaneContents = "";
-        for(i=0; i<refs.length; i++) {
-            var ref = refs[i];
-            rightPaneContents += "<div class=\"paragraph\">";
-            rightPaneContents += "<h1>";
-            rightPaneContents += titles[ref].toUpperCase() + " (" + ref + ")";
-            rightPaneContents += "</h1>";
-            rightPaneContents += "<p>";
-            rightPaneContents += datasetContents[ref];
-            rightPaneContents += "</p>";
-            rightPaneContents += "</div>";
-        }
-        // reset scroll in paragraphs pane
-        var paragraphs = document.getElementById('paragraphs');
-        paragraphs.scrollTop = 0;
-        // inject fetched data
-        injectToRightpane(paragraphs, rightPaneContents);
-    }
-
+    // This function is nested here as datasetContents is only available in
+    // this context and I don't know how to pass it from .on('click') event
     function boxMouseClick(d, i) {
         selectGroup(d.group);
-        fetchAndInjectStories(d.group);
+        showContents(datasetContents, d.group);
         // get the offset of selected book (if any) - it will be added to other books
         // so everything will be correctly adjusted even if clicked book was moved
         var selectedTranslateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
@@ -291,34 +323,13 @@ function main(datasetTitles, datasetContents) {
         }
     }
 
-    function getNextCoordinates(groupCoordinates, group, index) {
-        var ret = null;
-        if (index > 2) {
-            return ret;
-        }
-        var nextCoordinates = groupCoordinates[group];
-        for (var x=index+1; x<nextCoordinates.length; x++) {
-            if (nextCoordinates[x] != null) {
-                return {"x": x, "y": nextCoordinates[x]};
-            }
-        }
-        return ret;
-    }
-
-    function truncate(string){
-        var length = 28;
-       if (string.length > length)
-          return string.substring(0, length) + '...';
-       else
-          return string;
-    };
-
+    // Reset everything on title click
+    // Makes sense only in this context as otherwise there's nothing to reset
     d3.select("a#title").on("click", function() {
-        // Reset everything
         d3.event.preventDefault();
         window.scrollTo(0, 0);
         unselectSelected();
-        injectToRightpane("#paragraphs", intro);
+        injectHtml("#paragraphs", intro);
         d3.selectAll("g").transition().duration(125).attr("transform", "translate(0,0)");
     });
 }
