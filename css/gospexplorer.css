@@ -37,7 +37,11 @@
     margin-left: 260px;
     padding: 36px 0;
     z-index: 0;
-    background: #f7f8fa; /* colorBlue1 */
+    background: -webkit-linear-gradient(left, #f7f8fa, #f4f5f7); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(right, #f7f8fa, #f4f5f7); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(right, #f7f8fa, #f4f5f7); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to right, #f7f8fa, #f4f5f7); /* Standard syntax */
+
     border-right: 1px solid #cfd0d1;
 }
 
@@ -70,4 +74,16 @@ rect {
 text {
     font-family: Verdana, Geneva, sans-serif;
     cursor: default;
+}
+
+a#title {
+    color: #f7f8fa;
+}
+
+a#title:hover {
+    color: #cfd0d1;
+}
+
+a#title {
+    text-decoration: none;
 }

@@ -40,10 +40,18 @@ var defaultContent = "" +
 "<span style=\"color: #b61a01\">AD MAIOREM DEI GLORIAM</span>" +
 "</p>";
 
+
+function injectToRightpane(selector, html) {
+    d3.select(selector).html(html)
+    .style("color", colorBlue1)
+    .transition().duration("500").style("color", colorBlue8);
+}
+
 d3.json("data/data.json", function(dataset) {
-    document.getElementById("paragraphs").innerHTML = defaultContent;
+    injectToRightpane("#paragraphs", defaultContent);
     main(dataset);
 });
+
 
 function main(dataset) {
     // key - group ID
@@ -201,13 +209,15 @@ function main(dataset) {
         }
     }
 
-    function selectGroup(group) {
-        // remove selection style from currently selected elements
+    function unselectSelected() {
         d3.selectAll("rect.selected")
         .classed("selected", false)
         .style("stroke", colorBlue2)
         .style("stroke-width", 1);
-        // select clicked
+    }
+
+    function selectGroup(group) {
+        unselectSelected()
         for(i=0; i<group.length; i++) {
             d3.selectAll(".grp-" + group[i]).classed("selected", true)
             .style("stroke-width", 2)
@@ -229,7 +239,7 @@ function main(dataset) {
         }
 
         // Send AJAX request
-        // TODO: use async call and callback functions
+        // TODO: use async call and callback functions; use d3js ajax function
         refsString = refs.join(";");
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.open("GET", "paragraph.php?q=" + refsString, false);
@@ -253,11 +263,10 @@ function main(dataset) {
         var paragraphs = document.getElementById('paragraphs');
         paragraphs.scrollTop = 0;
         // inject fetched data
-        d3.select(paragraphs).html(rightPaneContents)
-        .style("color", colorBlue1)
-        .transition().duration("500").style("color", colorBlue8);
-
+        injectToRightpane(paragraphs, rightPaneContents);
     }
+
+
 
     function boxMouseClick(d, i) {
         selectGroup(d.group);
@@ -298,10 +307,10 @@ function main(dataset) {
           return string;
     };
 
-
-
-    // function resetAll() {
-        // document.getElementById("paragraphs").innerHTML = defaultContent;
-        // d3.bookGrp.attr("transform", "translate(0,0)");
-    // }
+    d3.select("a#title").on("click", function() {
+        // Reset everything
+        unselectSelected();
+        injectToRightpane("#paragraphs", defaultContent);
+        d3.selectAll("g").transition().duration(125).attr("transform", "translate(0,0)");
+    });
 }
