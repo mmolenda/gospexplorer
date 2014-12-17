@@ -31,8 +31,9 @@ var frequencyColors = {
     4: colorBlue4
 }
 
-var defaultContent = "" + 
+var intro = "" + 
 "<p>" + 
+"<span style=\"color: #b61a01\">PRZEZNACZENIEM</span> tego narzędzia jest wizualizacja ewangelii pod względem struktury i współwystępowania poszczególnych fragmentów oraz ułatwienie czytania powiązanych fragmentów<br /><br />" +
 "<span style=\"color: #b61a01\">INTENSYWNOŚĆ</span> koloru jest proporcjonalna do liczby wystąpień danego fragmentu w ewangeliach - im ciemniejszy kolor w tym większej liczbie ewangelii dany fragment występuje<br /><br />" +
 "<span style=\"color: #b61a01\">KLIKNIJ</span> wybrany fragment, aby pokazać jego treść oraz powiązane fragmenty z pozostałych ewangelii<br /><br />" +
 "<span style=\"color: #b61a01\">PRZECIĄGNIJ</span> wybraną ewangelię w pionie aby zmienić jej pozycję względem pozostałych<br /><br />" +
@@ -48,7 +49,7 @@ function injectToRightpane(selector, html) {
 }
 
 d3.json("data/data.json", function(dataset) {
-    injectToRightpane("#paragraphs", defaultContent);
+    injectToRightpane("#paragraphs", intro);
     main(dataset);
 });
 
@@ -310,7 +311,7 @@ function main(dataset) {
     d3.select("a#title").on("click", function() {
         // Reset everything
         unselectSelected();
-        injectToRightpane("#paragraphs", defaultContent);
+        injectToRightpane("#paragraphs", intro);
         d3.selectAll("g").transition().duration(125).attr("transform", "translate(0,0)");
     });
 }
