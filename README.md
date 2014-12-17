@@ -2,7 +2,7 @@ gospexplorer
 ============
 
 TODO:
-- change ajax request to d3js one
+- add loading indicator
 - stop propagation on title click
 - refactor function definitions
 - remove colorWhite

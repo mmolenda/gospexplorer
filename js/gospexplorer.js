@@ -48,13 +48,26 @@ function injectToRightpane(selector, html) {
     .transition().duration("500").style("color", colorBlue8);
 }
 
-d3.json("data/data.json", function(dataset) {
-    injectToRightpane("#paragraphs", intro);
-    main(dataset);
+// Setting up intro text
+injectToRightpane("#paragraphs", intro);
+
+// Loading the data and running main function in case of success
+d3.json("data/bt_titles.json", function(error, datasetTitles) {
+    if (error != null) {
+        alert("Cannot load the data - titles");
+        return;
+    }
+    d3.json("data/bt_contents.json", function(error, datasetContents) {
+        if (error != null) {
+            alert("Cannot load the data - contents");
+            return;
+        }
+        main(datasetTitles, datasetContents);
+    })
 });
 
 
-function main(dataset) {
+function main(datasetTitles, datasetContents) {
     // key - group ID
     // value - list of y indexes for each book 
     // 1: [0, null, null, null]
@@ -68,8 +81,8 @@ function main(dataset) {
     var groupCount = {};
 
     // Filling in groupCoordinates and groupCount dictionaries
-    for (var i=0; i<dataset.length; i++) {
-        var book = dataset[i];
+    for (var i=0; i<datasetTitles.length; i++) {
+        var book = datasetTitles[i];
         for (var j=0; j<book.length; j++) {
             var div = book[j];
             for (var k=0; k<div.group.length; k++) {
@@ -113,7 +126,7 @@ function main(dataset) {
 
     // each book consisting of boxes and texts is in separate group
     var groups = [];
-    for (var index=0; index<dataset.length; index++) {
+    for (var index=0; index<datasetTitles.length; index++) {
         groups.push(
             svg.append("g")
             .attr("id", "grp-" + index)
@@ -122,10 +135,10 @@ function main(dataset) {
     }
 
     // Drawing the boxes
-    for (var index=0; index<dataset.length; index++) {
+    for (var index=0; index<datasetTitles.length; index++) {
         groups[index]
             .selectAll("rect.i" + index)
-            .data(dataset[index])
+            .data(datasetTitles[index])
             .enter()
             .append("rect")
             .attr("x", function (d, i) {
@@ -162,10 +175,10 @@ function main(dataset) {
     }
 
     // Adding text to the boxes
-    for (var index=0; index<dataset.length; index++) {
+    for (var index=0; index<datasetTitles.length; index++) {
         groups[index]
             .selectAll("text.i" + index)
-            .data(dataset[index])
+            .data(datasetTitles[index])
             .enter()
             .append("text")
             .text(function (d) {
@@ -229,7 +242,6 @@ function main(dataset) {
     function fetchAndInjectStories(group) {
         var refs = [];
         var titles = {};
-        var refsString;
         for(i=0; i<group.length; i++) {
             var rects = d3.selectAll("rect.grp-" + group[i]);
             for(j=0; j<rects[0].length; j++) {
@@ -239,14 +251,6 @@ function main(dataset) {
             }
         }
 
-        // Send AJAX request
-        // TODO: use async call and callback functions; use d3js ajax function
-        refsString = refs.join(";");
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.open("GET", "paragraph.php?q=" + refsString, false);
-        xmlhttp.send();
-        var obj = JSON.parse(xmlhttp.responseText);
-        
         // Prepare right pane HTML
         var rightPaneContents = "";
         for(i=0; i<refs.length; i++) {
@@ -256,7 +260,7 @@ function main(dataset) {
             rightPaneContents += titles[ref].toUpperCase() + " (" + ref + ")";
             rightPaneContents += "</h1>";
             rightPaneContents += "<p>";
-            rightPaneContents += obj[ref];
+            rightPaneContents += datasetContents[ref];
             rightPaneContents += "</p>";
             rightPaneContents += "</div>";
         }
@@ -267,8 +271,6 @@ function main(dataset) {
         injectToRightpane(paragraphs, rightPaneContents);
     }
 
-
-
     function boxMouseClick(d, i) {
         selectGroup(d.group);
         fetchAndInjectStories(d.group);
@@ -276,7 +278,7 @@ function main(dataset) {
         // so everything will be correctly adjusted even if clicked book was moved
         var selectedTranslateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
         // adjust other books to clicked one by group
-        for (var book=0; book<dataset.length; book++) {
+        for (var book=0; book<datasetTitles.length; book++) {
             var bookGrp = d3.select("g#grp-" + book);
             var index = groupCoordinates[d.group[0]][book];
             // do not touch current book and books that don't contain the group
