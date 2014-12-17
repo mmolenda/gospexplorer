@@ -25,6 +25,8 @@
     float: left;
     padding-top: 42px;
     overflow: hidden;
+    text-align: center;
+    color: #cfd0d1; /* colorBlue3 */
 }
 
 #rightpane {

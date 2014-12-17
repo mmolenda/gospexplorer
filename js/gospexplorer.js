@@ -2,6 +2,7 @@
 // author: Marcin Molenda <spamm@molenda.eu>
 // since: 09/16/2014
 
+var __version__ = null
 
 var barPaddingHorizontal = 10;
 var barPaddingVertical = 20;
@@ -21,7 +22,7 @@ var colorBlue8 = "#5b5b5c";
 var colorRed2 = "#b61a01";
 
 //Width and height
-var w = 1200;
+var w = 920;
 var h = (barHeight + barPaddingHorizontal) * 200;
 
 var frequencyColors = {
@@ -50,6 +51,7 @@ function injectToRightpane(selector, html) {
 
 // Setting up intro text
 injectToRightpane("#paragraphs", intro);
+d3.select("#leftpane").html("Loading...");
 
 // Loading the data and running main function in case of success
 d3.json("data/bt_titles.json", function(error, datasetTitles) {
@@ -62,6 +64,7 @@ d3.json("data/bt_titles.json", function(error, datasetTitles) {
             alert("Cannot load the data - contents");
             return;
         }
+        d3.select("#leftpane").html("");
         main(datasetTitles, datasetContents);
     })
 });
@@ -154,8 +157,8 @@ function main(datasetTitles, datasetContents) {
             .attr("group", function(d, i) {return d.group;})
             .attr("class", function (d, i) {
                 var classes = [];
-                // // Related boxes and paths belong to the same group;
-                // // for highlighting purposes
+                // Related boxes and paths belong to the same group;
+                // for highlighting purposes
                 for (var i=0; i<d.group.length; i++) {
                     classes.push("grp-" + d.group[i]);
                 }
@@ -167,7 +170,7 @@ function main(datasetTitles, datasetContents) {
                 for(i=0; i<d.group.length; i++) {
                     groupCounts.push(groupCount[d.group[i]]);
                 }
-                return (d.group) ? frequencyColors[Math.max.apply(Math, groupCounts)] : colorWhite;
+                return (d.group) ? frequencyColors[Math.max.apply(Math, groupCounts)] : colorBlue1;
             })
             .on("mouseover", boxMouseOver)
             .on("mouseout", boxMouseOut)
@@ -312,6 +315,7 @@ function main(datasetTitles, datasetContents) {
 
     d3.select("a#title").on("click", function() {
         // Reset everything
+        d3.event.preventDefault();
         unselectSelected();
         injectToRightpane("#paragraphs", intro);
         d3.selectAll("g").transition().duration(125).attr("transform", "translate(0,0)");
