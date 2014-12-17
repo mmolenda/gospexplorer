@@ -2,6 +2,7 @@
 // author: Marcin Molenda <spamm@molenda.eu>
 // since: 09/16/2014
 
+var __version__ = null
 
 var barPaddingHorizontal = 10;
 var barPaddingVertical = 20;
@@ -21,7 +22,7 @@ var colorBlue8 = "#5b5b5c";
 var colorRed2 = "#b61a01";
 
 //Width and height
-var w = 1200;
+var w = 920;
 var h = (barHeight + barPaddingHorizontal) * 200;
 
 var frequencyColors = {
@@ -48,13 +49,28 @@ function injectToRightpane(selector, html) {
     .transition().duration("500").style("color", colorBlue8);
 }
 
-d3.json("data/data.json", function(dataset) {
-    injectToRightpane("#paragraphs", intro);
-    main(dataset);
+// Setting up intro text
+injectToRightpane("#paragraphs", intro);
+d3.select("#leftpane").html("Loading...");
+
+// Loading the data and running main function in case of success
+d3.json("data/bt_titles.json", function(error, datasetTitles) {
+    if (error != null) {
+        alert("Cannot load the data - titles");
+        return;
+    }
+    d3.json("data/bt_contents.json", function(error, datasetContents) {
+        if (error != null) {
+            alert("Cannot load the data - contents");
+            return;
+        }
+        d3.select("#leftpane").html("");
+        main(datasetTitles, datasetContents);
+    })
 });
 
 
-function main(dataset) {
+function main(datasetTitles, datasetContents) {
     // key - group ID
     // value - list of y indexes for each book 
     // 1: [0, null, null, null]
@@ -68,8 +84,8 @@ function main(dataset) {
     var groupCount = {};
 
     // Filling in groupCoordinates and groupCount dictionaries
-    for (var i=0; i<dataset.length; i++) {
-        var book = dataset[i];
+    for (var i=0; i<datasetTitles.length; i++) {
+        var book = datasetTitles[i];
         for (var j=0; j<book.length; j++) {
             var div = book[j];
             for (var k=0; k<div.group.length; k++) {
@@ -113,7 +129,7 @@ function main(dataset) {
 
     // each book consisting of boxes and texts is in separate group
     var groups = [];
-    for (var index=0; index<dataset.length; index++) {
+    for (var index=0; index<datasetTitles.length; index++) {
         groups.push(
             svg.append("g")
             .attr("id", "grp-" + index)
@@ -122,10 +138,10 @@ function main(dataset) {
     }
 
     // Drawing the boxes
-    for (var index=0; index<dataset.length; index++) {
+    for (var index=0; index<datasetTitles.length; index++) {
         groups[index]
             .selectAll("rect.i" + index)
-            .data(dataset[index])
+            .data(datasetTitles[index])
             .enter()
             .append("rect")
             .attr("x", function (d, i) {
@@ -141,8 +157,8 @@ function main(dataset) {
             .attr("group", function(d, i) {return d.group;})
             .attr("class", function (d, i) {
                 var classes = [];
-                // // Related boxes and paths belong to the same group;
-                // // for highlighting purposes
+                // Related boxes and paths belong to the same group;
+                // for highlighting purposes
                 for (var i=0; i<d.group.length; i++) {
                     classes.push("grp-" + d.group[i]);
                 }
@@ -154,7 +170,7 @@ function main(dataset) {
                 for(i=0; i<d.group.length; i++) {
                     groupCounts.push(groupCount[d.group[i]]);
                 }
-                return (d.group) ? frequencyColors[Math.max.apply(Math, groupCounts)] : colorWhite;
+                return (d.group) ? frequencyColors[Math.max.apply(Math, groupCounts)] : colorBlue1;
             })
             .on("mouseover", boxMouseOver)
             .on("mouseout", boxMouseOut)
@@ -162,10 +178,10 @@ function main(dataset) {
     }
 
     // Adding text to the boxes
-    for (var index=0; index<dataset.length; index++) {
+    for (var index=0; index<datasetTitles.length; index++) {
         groups[index]
             .selectAll("text.i" + index)
-            .data(dataset[index])
+            .data(datasetTitles[index])
             .enter()
             .append("text")
             .text(function (d) {
@@ -229,7 +245,6 @@ function main(dataset) {
     function fetchAndInjectStories(group) {
         var refs = [];
         var titles = {};
-        var refsString;
         for(i=0; i<group.length; i++) {
             var rects = d3.selectAll("rect.grp-" + group[i]);
             for(j=0; j<rects[0].length; j++) {
@@ -239,14 +254,6 @@ function main(dataset) {
             }
         }
 
-        // Send AJAX request
-        // TODO: use async call and callback functions; use d3js ajax function
-        refsString = refs.join(";");
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.open("GET", "paragraph.php?q=" + refsString, false);
-        xmlhttp.send();
-        var obj = JSON.parse(xmlhttp.responseText);
-        
         // Prepare right pane HTML
         var rightPaneContents = "";
         for(i=0; i<refs.length; i++) {
@@ -256,7 +263,7 @@ function main(dataset) {
             rightPaneContents += titles[ref].toUpperCase() + " (" + ref + ")";
             rightPaneContents += "</h1>";
             rightPaneContents += "<p>";
-            rightPaneContents += obj[ref];
+            rightPaneContents += datasetContents[ref];
             rightPaneContents += "</p>";
             rightPaneContents += "</div>";
         }
@@ -267,8 +274,6 @@ function main(dataset) {
         injectToRightpane(paragraphs, rightPaneContents);
     }
 
-
-
     function boxMouseClick(d, i) {
         selectGroup(d.group);
         fetchAndInjectStories(d.group);
@@ -276,7 +281,7 @@ function main(dataset) {
         // so everything will be correctly adjusted even if clicked book was moved
         var selectedTranslateY = d3.transform(d3.select("g#grp-" + d.book).attr("transform"))["translate"][1];
         // adjust other books to clicked one by group
-        for (var book=0; book<dataset.length; book++) {
+        for (var book=0; book<datasetTitles.length; book++) {
             var bookGrp = d3.select("g#grp-" + book);
             var index = groupCoordinates[d.group[0]][book];
             // do not touch current book and books that don't contain the group
@@ -310,6 +315,8 @@ function main(dataset) {
 
     d3.select("a#title").on("click", function() {
         // Reset everything
+        d3.event.preventDefault();
+        window.scrollTo(0, 0);
         unselectSelected();
         injectToRightpane("#paragraphs", intro);
         d3.selectAll("g").transition().duration(125).attr("transform", "translate(0,0)");
