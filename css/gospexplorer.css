@@ -1,3 +1,6 @@
+a {
+   outline: 0;
+}
 
 #header {
     width: 100%;
@@ -42,13 +45,10 @@ a#title {
 }
 
 #rightpane {
-    height: 100%;
-    width: 360px;
-    position: fixed;
     float: right;
-    left: 50%;
+    height: 100%;
+    position: fixed;
     top: 0;
-    margin-left: 260px;
     padding: 36px 0;
     z-index: 0;
     background: -webkit-linear-gradient(left, #f7f8fa, #f4f5f7); /* For Safari 5.1 to 6.0 */
@@ -68,13 +68,11 @@ a#title {
 }
 
 #paragraphs p {
-    font-size: 16px;
     text-align: justify;
 }
 
 #paragraphs h1 {
     font-weight: bold;
-    font-size: 16px;
     color: #b61a01;  /* colorRed2 */
 }
 

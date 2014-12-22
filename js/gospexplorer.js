@@ -9,10 +9,14 @@ var __version__ = "v0.1"
 //
 var barPaddingHorizontal = 10;
 var barPaddingVertical = 20;
-var barWidth = 200;
+var barWidthBigscreen = 200;
+var barWidthSmallscreen = 150;
 var barHeight = 20;
 var labelOffsetVertical = 10;
 var labelOffsetHorizontal = 10;
+var textWidthSmallscreen = 20;
+var textWidthBigscreen = 28;
+var sizeBoundary = 1280;
 
 var colorBlue1 = "#f7f8fa";
 var colorBlue2 = "#e3e4e6";
@@ -25,7 +29,7 @@ var colorBlue8 = "#5b5b5c";
 var colorRed2 = "#b61a01";
 
 // Width and height
-var w = 920;
+var w = 900;
 var h = (barHeight + barPaddingHorizontal) * 200;
 
 var frequencyColors = {
@@ -109,8 +113,7 @@ function getNextCoordinates(groupCoordinates, group, index) {
     return ret;
 }
 
-function truncate(string){
-    var length = 28;
+function truncate(string, length){
    if (string.length > length)
       return string.substring(0, length) + '...';
    else
@@ -149,6 +152,16 @@ function showContents(datasetContents, group) {
     injectHtml(paragraphs, rightPaneContents);
 }
 
+function getWindowSize() {
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        x = w.innerWidth || e.clientWidth || g.clientWidth;
+    var size = x >= sizeBoundary ? 'big' : 'small';
+    return size;
+}
+
 //
 // Setting up actual stuff
 //
@@ -167,12 +180,30 @@ d3.json("data/bt_titles.json", function(error, datasetTitles) {
             return;
         }
         d3.select("#leftpane").html("");
-        visualizeData(datasetTitles, datasetContents);
+        visualizeDataForWindowSize(datasetTitles, datasetContents)
+
+        // change boxes' and texts' size when window is getting narrower than `var sizeBoundary`
+        var doit;
+        window.onresize = function() {
+            clearTimeout(doit);
+            doit = setTimeout(function() {
+                d3.select("svg").remove();
+                visualizeDataForWindowSize(datasetTitles, datasetContents);
+            }, 100);
+        };
     })
 });
 
 
-function visualizeData(datasetTitles, datasetContents) {
+function visualizeDataForWindowSize(datasetTitles, datasetContents) {
+    if (getWindowSize() == 'big') {
+        visualizeData(datasetTitles, datasetContents, barWidthBigscreen, textWidthBigscreen);
+    } else if (getWindowSize() == 'small') {
+        visualizeData(datasetTitles, datasetContents, barWidthSmallscreen, textWidthSmallscreen);
+    }    
+}
+
+function visualizeData(datasetTitles, datasetContents, barWidth, textWidth) {
     // key - group ID
     // value - list of y indexes for each book 
     // 1: [0, null, null, null]
@@ -287,7 +318,7 @@ function visualizeData(datasetTitles, datasetContents) {
             .enter()
             .append("text")
             .text(function (d) {
-                return truncate(d.ref + " " + d.title);
+                return truncate(d.ref + " " + d.title, textWidth);
             })
             .attr("text-anchor", "left")
             .attr("x", function (d, i) {
