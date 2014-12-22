@@ -1,0 +1,13 @@
+#rightpane {
+    width: 360px;
+    left: 50%;
+    margin-left: 260px;
+}
+
+#paragraphs p {
+    font-size: 16px;
+}
+
+#paragraphs h1 {
+    font-size: 16px;
+}
