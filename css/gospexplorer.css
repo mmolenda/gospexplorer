@@ -85,3 +85,8 @@ text {
     cursor: default;
 }
 
+.verse_no {
+    vertical-align: super;
+    font-size: 75%;
+    font-weight: bold;
+}

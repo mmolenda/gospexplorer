@@ -141,7 +141,7 @@ function showContents(datasetContents, group) {
         rightPaneContents += titles[ref].toUpperCase() + " (" + ref + ")";
         rightPaneContents += "</h1>";
         rightPaneContents += "<p>";
-        rightPaneContents += datasetContents[ref];
+        rightPaneContents += getInnerContents(datasetContents, ref);
         rightPaneContents += "</p>";
         rightPaneContents += "</div>";
     }
@@ -150,6 +150,25 @@ function showContents(datasetContents, group) {
     paragraphs.scrollTop = 0;
     // inject fetched data
     injectHtml(paragraphs, rightPaneContents);
+}
+
+function getInnerContents(datasetContents, ref) {
+    var regex = /([a-zA-Z]+)(\d+),(\d+)-(\d+)/;
+    var results = regex.exec(ref);
+
+    var book_id = results[1];
+    var chapter_id = results[2];
+    var verse_from = results[3];
+    var verse_to = results[4];
+
+    var contents = "";
+    for (var ii=verse_from-1; ii<verse_to; ii++) {
+        var verse_no = ii + 1;
+        var verse = datasetContents[book_id][chapter_id - 1][ii];
+        contents += "<span class=\"verse_no\">" + verse_no + "</span>";
+        contents += verse + " ";
+    }
+    return contents;
 }
 
 function getWindowSize() {
