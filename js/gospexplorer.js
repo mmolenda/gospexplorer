@@ -39,17 +39,6 @@ var frequencyColors = {
     4: colorBlue4
 }
 
-var intro = "" + 
-"<p>" + 
-"<span style=\"color: #b61a01\">PRZEZNACZENIEM</span> tego narzędzia jest wizualizacja ewangelii pod względem struktury i współwystępowania poszczególnych fragmentów oraz ułatwienie czytania powiązanych fragmentów<br /><br />" +
-"<span style=\"color: #b61a01\">INTENSYWNOŚĆ</span> koloru jest proporcjonalna do liczby wystąpień danego fragmentu w ewangeliach - im ciemniejszy kolor w tym większej liczbie ewangelii dany fragment występuje<br /><br />" +
-"<span style=\"color: #b61a01\">KLIKNIJ</span> wybrany fragment, aby pokazać jego treść oraz powiązane fragmenty z pozostałych ewangelii<br /><br />" +
-"<span style=\"color: #b61a01\">PRZECIĄGNIJ</span> wybraną ewangelię w pionie aby zmienić jej pozycję względem pozostałych<br /><br />" +
-"<span style=\"color: #b61a01\">WSZYSTKIE</span> cytaty pochodzą z Biblii Tysiąclecia<br /><br />" +
-"<span style=\"color: #b61a01\">AD MAIOREM DEI GLORIAM</span>" +
-"</p>";
-
-
 //
 // Helper functions
 //
@@ -181,38 +170,63 @@ function getWindowSize() {
     return size;
 }
 
-//
-// Setting up actual stuff
-//
-injectHtml("#paragraphs", intro);
-d3.select("#leftpane").html("Loading...");
-
-// Loading the data and running main function in case of success
-d3.json("data/bt_titles.json", function(error, datasetTitles) {
-    if (error != null) {
-        alert("Cannot load the data - titles");
-        return;
+function getLanguage() {
+    var language;
+    var hash = window.location.hash;
+    if (hash) {
+        // language set in url hash is more important than browser language
+        language = hash.slice(1);
+    } else {
+        // if no language set in hash, get one from browser settings
+        // and set up the hash and lang selector
+        var userLang = navigator.language || navigator.userLanguage | ""; 
+        var is_pl = userLang.match(/pl/gi) != null;
+        language = (is_pl) ? "pl" : "en";
     }
-    d3.json("data/bt_contents.json", function(error, datasetContents) {
+    setLanguage(language);
+    return language;
+}
+
+function setLanguage(language) {
+    location.hash = '#' + language;
+    d3.selectAll('a.lang').classed("lang_selected", false);
+    d3.select('a[href="#' + language + '"]').classed("lang_selected", true);
+}
+
+function loadAndVisualizeData(language) {
+    d3.html("data/" + language + "_intro.html", function(error, intro) {
+        d3.select("#paragraphs").html("")
+        var paragraphs = document.getElementById('paragraphs');
+        paragraphs.appendChild(intro);
+    });
+
+    d3.select("#leftpane").html("Loading...");
+    // Loading the data and running main function in case of success
+    d3.json("data/" + language + "_titles.json", function(error, datasetTitles) {
         if (error != null) {
-            alert("Cannot load the data - contents");
+            alert("Cannot load the data - titles");
             return;
         }
-        d3.select("#leftpane").html("");
-        visualizeDataForWindowSize(datasetTitles, datasetContents)
+        d3.json("data/" + language + "_contents.json", function(error, datasetContents) {
+            if (error != null) {
+                alert("Cannot load the data - contents");
+                return;
+            }
+            d3.select("#leftpane").html("");
+            visualizeDataForWindowSize(datasetTitles, datasetContents)
 
-        // change boxes' and texts' size when window is getting narrower than `var sizeBoundary`
-        var doit;
-        window.onresize = function() {
-            clearTimeout(doit);
-            doit = setTimeout(function() {
-                d3.select("svg").remove();
-                visualizeDataForWindowSize(datasetTitles, datasetContents);
-            }, 100);
-        };
-    })
-});
-
+            // change boxes' and texts' size when window is getting narrower than `var sizeBoundary`
+            var doit;
+            window.onresize = function() {
+                clearTimeout(doit);
+                doit = setTimeout(function() {
+                    d3.select("svg").remove();
+                    visualizeDataForWindowSize(datasetTitles, datasetContents);
+                }, 100);
+            };
+        })
+    });
+}
 
 function visualizeDataForWindowSize(datasetTitles, datasetContents) {
     if (getWindowSize() == 'big') {
@@ -372,14 +386,17 @@ function visualizeData(datasetTitles, datasetContents, barWidth, textWidth) {
             bookGrp.transition().attr("transform", "translate(0," + diff + ")");
         }
     }
-
-    // Reset everything on title click
-    // Makes sense only in this context as otherwise there's nothing to reset
-    d3.select("a#title").on("click", function() {
-        d3.event.preventDefault();
-        window.scrollTo(0, 0);
-        unselectSelected();
-        injectHtml("#paragraphs", intro);
-        d3.selectAll("g").transition().duration(125).attr("transform", "translate(0,0)");
-    });
 }
+
+loadAndVisualizeData(getLanguage());
+
+d3.select("a#title").on("click", function() {
+    d3.event.preventDefault();
+    loadAndVisualizeData(getLanguage());
+});
+
+d3.selectAll("a.lang").on("click", function() {
+    var language = d3.select(this).attr('href').slice(1);
+    setLanguage(language);
+    loadAndVisualizeData(language);
+});

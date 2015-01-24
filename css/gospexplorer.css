@@ -18,6 +18,24 @@ a {
     font-size: 14px;
 }
 
+#header #lang {
+    position: fixed;
+    right: 10px;
+    top: 6px;
+    color: #f7f8fa; /* colorBlue1 */
+    font-size: 75%;
+}
+
+#header #lang a {
+    text-decoration: none;
+    color: #f7f8fa; /* colorBlue1 */
+    font-weight: normal;
+}
+
+#header #lang a.lang_selected {
+    font-weight: bold;
+}
+
 a#title {
     color: #f7f8fa; /* colorBlue1 */
 }
