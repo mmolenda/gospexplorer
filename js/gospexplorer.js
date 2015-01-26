@@ -2,7 +2,7 @@
 // author: Marcin Molenda <spamm@molenda.eu>
 // since: 09/16/2014
 
-var __version__ = "v0.1"
+var __version__ = "v1.0"
 
 //
 // Constants
