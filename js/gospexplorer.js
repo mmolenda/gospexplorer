@@ -112,7 +112,8 @@ function truncate(string, length){
 function setFavicon() {
     var link=document.createElement('link');
     link.href="/img/favicon.png";
-    link.rel='icon';
+    link.rel="icon";
+    link.type="image/x-icon"
     document.getElementsByTagName('head')[0].appendChild(link);
 }
 
