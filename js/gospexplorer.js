@@ -109,6 +109,13 @@ function truncate(string, length){
       return string;
 };
 
+function setFavicon() {
+    var link=document.createElement('link');
+    link.href="/img/favicon.png";
+    link.rel='icon';
+    document.getElementsByTagName('head')[0].appendChild(link);
+}
+
 function showContents(datasetContents, group) {
     var refs = [];
     var titles = {};
@@ -142,6 +149,7 @@ function showContents(datasetContents, group) {
 }
 
 function getInnerContents(datasetContents, ref) {
+    // parse Mt10,1-5
     var regex = /([a-zA-Z]+)(\d+),(\d+)-(\d+)/;
     var results = regex.exec(ref);
 
@@ -194,10 +202,11 @@ function setLanguage(language) {
 }
 
 function loadAndVisualizeData(language) {
-    d3.html("data/" + language + "_intro.html", function(error, intro) {
-        d3.select("#paragraphs").html("")
-        var paragraphs = document.getElementById('paragraphs');
-        paragraphs.appendChild(intro);
+    // Load intro from file; use d3.text instead of d3.html as it's easier to deal with plain
+    // text html than with DocumentFragments object returned by d3.html is hard to deal with
+    d3.text("data/" + language + "_intro.html", function(error, intro) {
+        var versionDiv = '<div id="version">' + __version__ + '</div>';
+        injectHtml('#paragraphs', intro + versionDiv);
     });
 
     d3.select("#leftpane").html("Loading...");
@@ -388,15 +397,20 @@ function visualizeData(datasetTitles, datasetContents, barWidth, textWidth) {
     }
 }
 
+// Launch the application
 loadAndVisualizeData(getLanguage());
+setFavicon();
 
+// Bind the events
 d3.select("a#title").on("click", function() {
     d3.event.preventDefault();
     loadAndVisualizeData(getLanguage());
+    setFavicon();
 });
 
 d3.selectAll("a.lang").on("click", function() {
     var language = d3.select(this).attr('href').slice(1);
     setLanguage(language);
     loadAndVisualizeData(language);
+    setFavicon();
 });

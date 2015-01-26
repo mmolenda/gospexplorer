@@ -1,34 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Gospel Explorer</title>
-		<link rel="stylesheet" href="css/gospexplorer.css">
-		<link rel="stylesheet" media='screen and (min-width: 1280px)' href="css/big-screen.css">
-		<link rel="stylesheet" media='screen and (min-width: 1px) and (max-width: 1279px)' href="css/small-screen.css">
-	</head>
-<body>
+<head>
+    <!-- favicon is set up programatically as it wasn't work correctly with hashes on FF -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="A tool to visualize Gospels' structure and occurrence of individual fragments across the Gospels">
+    <meta name="keywords" content="gospel synoptic biblia ewangelia ewangelie synopsa bible study narzędzia biblijne">
+    <meta name="author" content="Marcin Molenda">
+    <title>Gospexplorer</title>
+    <link rel="stylesheet" href="css/gospexplorer.css">
+    <link rel="stylesheet" media='screen and (min-width: 1280px)' href="css/big-screen.css">
+    <link rel="stylesheet" media='screen and (min-width: 1px) and (max-width: 1279px)' href="css/small-screen.css">
+</head>
 
-<div id="header">
-<a id="title" href="#">&#10013;Gospexplorer</a>
-<span id="lang">
-	<a href="#pl" class="lang">PL</a> |
-	<a href="#en" class="lang">EN</a>
-</div>
-</div>
-<div id="container">
-	<div id="rightpane">
-		<div id="controls"></div>
-		<!-- <p>Reset</p> -->
-		<div id="paragraphs"></div>
-	</div> <!-- /#rightpane -->
-	<div id="leftpane">
-	</div> <!-- /#leftpane -->
-</div> <!-- /#container -->
-<div id="footer">
-</div>
-			
+<body>
+    <div id="header">
+        <a id="title" href="#">&#10013;Gospexplorer</a>
+        <span id="lang">
+            <a href="#pl" class="lang">PL</a> |
+            <a href="#en" class="lang">EN</a>
+        </span>
+    </div>
+        <div id="container">
+        <div id="rightpane">
+            <div id="controls"></div>
+            <div id="paragraphs"></div>
+        </div> <!-- /#rightpane -->
+        <div id="leftpane"></div>
+    </div> <!-- /#container -->
+    <div id="footer"></div>
+    			
+    <script type="text/javascript" src="js/lib/d3.v3.min.js"></script>
+    <script type="text/javascript" src="js/gospexplorer.js"></script>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-58957315-1', 'auto');
+        ga('send', 'pageview');
+    </script>
 </body>
-<script type="text/javascript" src="js/lib/d3.v3.min.js"></script>
-<script type="text/javascript" src="js/gospexplorer.js"></script>
 </html>
